@@ -59,28 +59,47 @@ export function ChatPanel({ patientId, patientName }: Props) {
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
-        for (const line of lines) {
+        for (const raw of lines) {
+          const line = raw.trimEnd();
           if (line.startsWith("data: ")) {
             const data = line.slice(6);
             if (data === "[DONE]") continue;
             try {
               const parsed = JSON.parse(data);
+              if (parsed.error) {
+                throw new Error(parsed.error);
+              }
               if (parsed.text) {
                 fullText += parsed.text;
                 setStreamingText(fullText);
               }
-            } catch {
-              // skip malformed chunks
+            } catch (e) {
+              if (e instanceof Error && e.message !== "Unexpected end of JSON input") throw e;
             }
           }
+        }
+      }
+
+      buffer += decoder.decode();
+      if (buffer.trimEnd().startsWith("data: ")) {
+        const data = buffer.trimEnd().slice(6);
+        if (data !== "[DONE]") {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.text) {
+              fullText += parsed.text;
+            }
+          } catch { /* ignore trailing partial */ }
         }
       }
 

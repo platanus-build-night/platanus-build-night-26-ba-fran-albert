@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 interface Props {
   patientId: string;
@@ -36,6 +37,12 @@ export function SummaryPanel({ patientId }: Props) {
     }
   }
 
+  async function handleCopy() {
+    if (!summary) return;
+    await navigator.clipboard.writeText(summary);
+    toast.success("Resumen copiado al portapapeles");
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
@@ -44,23 +51,36 @@ export function SummaryPanel({ patientId }: Props) {
             <FileText className="h-4 w-4" />
             Resumen de HC
           </CardTitle>
-          <Button size="sm" onClick={handleSummarize} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                Analizando...
-              </>
-            ) : (
-              "Generar resumen"
+          <div className="flex gap-1.5">
+            {summary && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopy}
+                className="h-7 text-xs"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                Copiar
+              </Button>
             )}
-          </Button>
+            <Button size="sm" onClick={handleSummarize} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                "Generar resumen"
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto">
         {!summary && !loading && !error && (
           <p className="text-sm text-muted-foreground text-center py-8">
-            Presiona &quot;Generar resumen&quot; para obtener un resumen de la historia
-            clinica del paciente generado por IA.
+            Presioná &quot;Generar resumen&quot; para obtener un resumen de la
+            historia clínica del paciente generado por IA.
           </p>
         )}
         {error && (

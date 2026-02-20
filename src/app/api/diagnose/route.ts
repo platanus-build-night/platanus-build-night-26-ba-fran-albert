@@ -1,14 +1,10 @@
 import { NextRequest } from "next/server";
 import { streamCompletion } from "@/lib/ai";
-import { EVOLUTION_PROMPT } from "@/lib/prompts";
+import { DIAGNOSE_PROMPT } from "@/lib/prompts";
 import { getPatientById, buildPatientContext } from "@/lib/mock-data";
 
 export async function POST(req: NextRequest) {
-  const { patientId, freeText } = await req.json();
-
-  if (!freeText?.trim()) {
-    return new Response("Texto requerido", { status: 400 });
-  }
+  const { patientId, consultaActual } = await req.json();
 
   const record = getPatientById(patientId);
   if (!record) {
@@ -19,7 +15,7 @@ export async function POST(req: NextRequest) {
   const messages: Array<{ role: "user" | "assistant"; content: string }> = [
     {
       role: "user",
-      content: `Contexto del paciente:\n${context}\n\n---\n\nTexto libre del médico:\n${freeText}\n\nEstructurá esta consulta en formato de evolución clínica.`,
+      content: `Contexto completo del paciente:\n${context}\n\n---\n\n${consultaActual ? `Consulta actual del médico:\n${consultaActual}\n\n---\n\n` : ""}Generá el análisis de diagnósticos diferenciales basándote en la historia clínica y la consulta actual.`,
     },
   ];
 
@@ -28,7 +24,7 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       try {
         for await (const chunk of streamCompletion(
-          EVOLUTION_PROMPT,
+          DIAGNOSE_PROMPT,
           messages,
         )) {
           controller.enqueue(
@@ -37,10 +33,10 @@ export async function POST(req: NextRequest) {
         }
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       } catch (error) {
-        console.error("Evolution stream error:", error);
+        console.error("Diagnose stream error:", error);
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ error: "Error al generar evolución" })}\n\n`,
+            `data: ${JSON.stringify({ error: "Error al generar diagnóstico" })}\n\n`,
           ),
         );
       } finally {

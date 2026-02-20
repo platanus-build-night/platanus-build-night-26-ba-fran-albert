@@ -13,6 +13,8 @@ import {
   Stethoscope,
   Brain,
   CheckCircle2,
+  Code2,
+  Monitor,
 } from "lucide-react";
 
 export default function Home() {
@@ -266,32 +268,41 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div data-animate data-delay="1">
               <FeatureCard
                 icon={<Mic className="h-5 w-5" />}
                 title="Voz a evolución"
-                description="Dictá la consulta con el micrófono. La IA la estructura automáticamente en formato de evolución clínica con todos los campos."
+                description="Dictá la consulta con el micrófono. La IA la estructura automáticamente en formato de evolución clínica."
                 glowClass="icon-glow-teal"
                 gradient="from-primary/20 to-primary/5"
               />
             </div>
-            <div data-animate data-delay="2">
+            <div data-animate data-delay="1">
               <FeatureCard
                 icon={<FileText className="h-5 w-5" />}
                 title="Resumen de HC"
-                description="Generá un resumen conciso de la historia clínica completa del paciente con un click. Antecedentes, medicación, estudios."
+                description="Generá un resumen conciso de la historia clínica completa del paciente con un click."
                 glowClass="icon-glow-blue"
                 gradient="from-blue-500/20 to-blue-500/5"
               />
             </div>
-            <div data-animate data-delay="3">
+            <div data-animate data-delay="2">
+              <FeatureCard
+                icon={<Brain className="h-5 w-5" />}
+                title="Diagnóstico diferencial"
+                description="La IA analiza los datos clínicos y sugiere diagnósticos diferenciales con evidencia."
+                glowClass="icon-glow-violet"
+                gradient="from-violet-500/20 to-violet-500/5"
+              />
+            </div>
+            <div data-animate data-delay="2">
               <FeatureCard
                 icon={<MessageCircle className="h-5 w-5" />}
                 title="Chat contextual"
-                description="Preguntale sobre el paciente: medicación, antecedentes, últimos estudios. La IA responde con datos reales de la HC."
-                glowClass="icon-glow-violet"
-                gradient="from-violet-500/20 to-violet-500/5"
+                description="Preguntale sobre el paciente: medicación, antecedentes, estudios. Responde con datos de la HC."
+                glowClass="icon-glow-blue"
+                gradient="from-blue-500/20 to-blue-500/5"
               />
             </div>
           </div>
@@ -338,6 +349,92 @@ export default function Home() {
                   title="Evolución lista"
                   description="Obtenés la evolución clínica completa y estructurada. Revisá, editá si hace falta, y listo."
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Integration / Embed */}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div data-animate className="text-center mb-14">
+            <p className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
+              Integración
+            </p>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl tracking-tight">
+              Integralo en tu sistema de HC
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              MediScribe se embebe como un iframe en cualquier sistema de
+              historia clínica existente. Sin migración, sin cambios en tu
+              infraestructura.
+            </p>
+          </div>
+
+          <div data-animate data-delay="1" className="relative">
+            <div className="mockup-glow" />
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm overflow-hidden">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06] bg-white/[0.02]">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                </div>
+                <div className="flex items-center gap-1.5 ml-3">
+                  <Monitor className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    tu-sistema-hc.com/paciente/12345
+                  </span>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2">
+                <div className="p-6 sm:p-8 lg:p-10 border-r border-white/[0.06]">
+                  <div className="flex items-center gap-2 mb-5">
+                    <Code2 className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-medium text-primary tracking-wide">
+                      Tu sistema de HC
+                    </span>
+                  </div>
+                  <div className="font-mono text-xs text-muted-foreground space-y-1 leading-relaxed">
+                    <p className="text-blue-400">
+                      &lt;!-- Datos del paciente --&gt;
+                    </p>
+                    <p>&lt;div class=&quot;patient-data&quot;&gt;</p>
+                    <p className="pl-4">...</p>
+                    <p>&lt;/div&gt;</p>
+                    <p className="mt-3 text-blue-400">
+                      &lt;!-- MediScribe embed --&gt;
+                    </p>
+                    <p>
+                      &lt;iframe src=&quot;
+                      <span className="text-primary">
+                        /embed?patientId=12345
+                      </span>
+                      &quot;
+                    </p>
+                    <p className="pl-4">
+                      width=&quot;100%&quot; height=&quot;600&quot;
+                    </p>
+                    <p className="pl-4">
+                      style=&quot;border:none&quot; /&gt;
+                    </p>
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8 lg:p-10 flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <div className="inline-flex h-14 w-14 rounded-xl bg-primary/10 items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </div>
+                    <p className="text-sm font-medium">
+                      Widget embebible
+                    </p>
+                    <p className="text-xs text-muted-foreground max-w-[200px]">
+                      Evolución, resumen, diagnóstico y chat — todo en un
+                      iframe liviano
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
