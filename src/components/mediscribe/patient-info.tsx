@@ -33,14 +33,15 @@ export function PatientInfo({ record }: Props) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header Card */}
-      <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-card to-muted/50">
-        <div className="h-24 bg-primary/10 w-full relative">
-           <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+      <Card className="overflow-hidden shadow-sm bg-card border-border/50">
+        <div className="h-20 bg-primary/5 w-full relative border-b border-border/50">
+           <div className="absolute inset-0 opacity-10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" 
+                style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, var(--foreground) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
         </div>
         <CardContent className="relative pt-0 px-6 pb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12 mb-4">
-            <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
-              <AvatarFallback className="text-2xl bg-primary text-primary-foreground font-bold">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-10 mb-4">
+            <Avatar className="h-20 w-20 border-4 border-card shadow-lg">
+              <AvatarFallback className="text-xl bg-primary text-primary-foreground font-bold">
                 {patient.firstName[0]}{patient.lastName[0]}
               </AvatarFallback>
             </Avatar>
@@ -79,29 +80,29 @@ export function PatientInfo({ record }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Medical Background */}
-        <Card className="h-full">
-          <CardHeader>
+        <Card className="h-full border-border/50 shadow-sm bg-card">
+          <CardHeader className="pb-3 border-b bg-muted/10">
             <CardTitle className="flex items-center gap-2 text-base">
               <Activity className="h-5 w-5 text-primary" />
               Antecedentes Clínicos
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div>
-              <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Patologías Crónicas</h4>
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-2 tracking-wider">Patologías Crónicas</h4>
               <div className="flex flex-wrap gap-2">
                 {chronic.length > 0 ? chronic.map((c, i) => (
-                  <Badge key={i} variant="secondary" className="px-3 py-1">
+                  <Badge key={i} variant="secondary" className="px-3 py-1 bg-muted/50 text-foreground border-border/50">
                     {c.name}
                   </Badge>
                 )) : <span className="text-sm text-muted-foreground italic">Ninguna registrada</span>}
               </div>
             </div>
             
-            <Separator />
+            <Separator className="opacity-50" />
             
             <div>
-              <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-2">
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-2 tracking-wider">
                 <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                 Alergias
               </h4>
@@ -114,13 +115,13 @@ export function PatientInfo({ record }: Props) {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="opacity-50" />
 
              <div>
-              <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Hábitos</h4>
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-2 tracking-wider">Hábitos</h4>
               <div className="flex flex-wrap gap-2">
                  {habits.length > 0 ? habits.map((h, i) => (
-                  <Badge key={i} variant="outline" className="px-3 py-1">
+                  <Badge key={i} variant="outline" className="px-3 py-1 border-border/50">
                     {h.name}: {h.value}
                   </Badge>
                 )) : <span className="text-sm text-muted-foreground italic">Sin datos</span>}
@@ -131,22 +132,22 @@ export function PatientInfo({ record }: Props) {
 
         {/* Medications & Labs */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
+          <Card className="border-border/50 shadow-sm bg-card">
+            <CardHeader className="pb-3 border-b bg-muted/10">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Pill className="h-5 w-5 text-purple-500" />
                 Medicación Activa
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-3">
                 {activeMeds.length > 0 ? activeMeds.map((m, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 border border-transparent hover:border-border transition-colors">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:border-primary/20 transition-colors">
                     <div>
-                      <p className="font-medium text-sm">{m.name}</p>
+                      <p className="font-semibold text-sm">{m.name}</p>
                       <p className="text-xs text-muted-foreground">{m.dose} · {m.frequency}</p>
                     </div>
-                    <Badge variant="outline" className="text-[10px] bg-background">
+                    <Badge variant="outline" className="text-[10px] bg-background border-border/50">
                       Activo
                     </Badge>
                   </div>
@@ -156,8 +157,8 @@ export function PatientInfo({ record }: Props) {
           </Card>
 
           {alertLabs.length > 0 && (
-            <Card className="border-destructive/20 bg-destructive/5">
-              <CardHeader>
+            <Card className="border-destructive/20 bg-destructive/5 shadow-sm">
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base text-destructive">
                   <HeartPulse className="h-5 w-5" />
                   Alertas de Laboratorio
@@ -166,14 +167,14 @@ export function PatientInfo({ record }: Props) {
               <CardContent>
                 <div className="space-y-2">
                   {alertLabs.map((l, i) => (
-                    <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-background/50 border border-destructive/10">
+                    <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-background/80 border border-destructive/10">
                       <div>
                         <p className="font-medium text-sm">{l.testName}</p>
                         <p className="text-xs text-muted-foreground">
                           {l.value} {l.unit} <span className="opacity-70">(ref: {l.referenceMin}-{l.referenceMax})</span>
                         </p>
                       </div>
-                      <Badge variant="destructive" className="text-[10px]">
+                      <Badge variant="destructive" className="text-[10px] h-5">
                         {l.alert === "critical" ? "CRÍTICO" : "ANORMAL"}
                       </Badge>
                     </div>
@@ -190,11 +191,11 @@ export function PatientInfo({ record }: Props) {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50">
       <div className="text-muted-foreground">{icon}</div>
       <div>
-        <p className="text-[10px] uppercase font-bold text-muted-foreground/70">{label}</p>
-        <p className="text-sm font-medium">{value}</p>
+        <p className="text-[10px] uppercase font-bold text-muted-foreground/70 tracking-wider">{label}</p>
+        <p className="text-sm font-semibold">{value}</p>
       </div>
     </div>
   );

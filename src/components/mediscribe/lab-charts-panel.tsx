@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, FlaskConical, ChevronRight } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -52,7 +52,7 @@ function CustomDotComponent({ cx, cy, payload }: CustomDotProps) {
       cy={cy}
       r={5}
       fill={alertDotColor(payload.alert)}
-      stroke="hsl(var(--background))"
+      stroke="hsl(var(--card))"
       strokeWidth={2}
     />
   );
@@ -82,18 +82,18 @@ function CustomTooltipContent({
   if (!active || !payload || payload.length === 0) return null;
   const data = payload[0].payload;
   return (
-    <div className="rounded-lg border bg-popover p-2.5 shadow-md text-popover-foreground">
-      <p className="text-xs text-muted-foreground mb-1">{data.dateLabel}</p>
-      <p className="text-sm font-semibold">
-        <span
-          style={{ color: alertDotColor(data.alert) }}
-        >
-          {data.value} {unit}
+    <div className="rounded-xl border bg-popover/90 backdrop-blur-md p-3 shadow-xl text-popover-foreground">
+      <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">{data.dateLabel}</p>
+      <p className="text-base font-bold flex items-center gap-2">
+        <span style={{ color: alertDotColor(data.alert) }}>
+          {data.value}
         </span>
+        <span className="text-xs font-medium opacity-60">{unit}</span>
       </p>
-      <p className="text-[10px] text-muted-foreground mt-0.5">
-        Ref: {referenceMin} - {referenceMax} {unit}
-      </p>
+      <div className="mt-2 pt-2 border-t border-border/50">
+         <p className="text-[9px] text-muted-foreground uppercase font-semibold">Rango Referencia</p>
+         <p className="text-[10px] font-medium">{referenceMin} - {referenceMax} {unit}</p>
+      </div>
     </div>
   );
 }
@@ -127,7 +127,6 @@ export function LabChartsPanel({ record }: Props) {
       });
     }
 
-    // Solo series con 2+ data points, ordenar por fecha
     const result: LabSeries[] = [];
     for (const s of map.values()) {
       if (s.dataPoints.length >= 2) {
@@ -148,35 +147,29 @@ export function LabChartsPanel({ record }: Props) {
   const yDomain = useMemo(() => {
     if (!activeSeries) return [0, 100];
     const allValues = activeSeries.dataPoints.map((d) => d.value);
-    const min = Math.min(
-      ...allValues,
-      activeSeries.referenceMin
-    );
-    const max = Math.max(
-      ...allValues,
-      activeSeries.referenceMax
-    );
-    const padding = (max - min) * 0.15 || 5;
+    const min = Math.min(...allValues, activeSeries.referenceMin);
+    const max = Math.max(...allValues, activeSeries.referenceMax);
+    const padding = (max - min) * 0.2 || 5;
     return [Math.max(0, min - padding), max + padding];
   }, [activeSeries]);
 
   if (series.length === 0) {
     return (
-      <Card className="h-full flex flex-col">
-        <CardHeader className="pb-3">
+      <Card className="h-full flex flex-col border-border/50 shadow-sm overflow-hidden bg-card">
+        <CardHeader className="pb-3 border-b bg-muted/10">
           <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Tendencia de laboratorio
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Tendencias de Laboratorio
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <TrendingUp className="h-8 w-8 mx-auto text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              No hay suficientes datos de laboratorio para mostrar tendencias.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Se necesitan al menos 2 resultados del mismo análisis.
+        <CardContent className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
+          <div className="h-20 w-20 bg-muted/20 rounded-full flex items-center justify-center">
+            <FlaskConical className="h-10 w-10 text-muted-foreground/30" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">No hay suficientes datos</p>
+            <p className="text-xs text-muted-foreground max-w-[250px]">
+              Se requieren al menos dos determinaciones del mismo tipo para generar un gráfico de tendencia.
             </p>
           </div>
         </CardContent>
@@ -185,67 +178,73 @@ export function LabChartsPanel({ record }: Props) {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <TrendingUp className="h-4 w-4" />
-          Tendencia de laboratorio
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {series.length} análisis con tendencia disponible
-        </p>
+    <Card className="h-full flex flex-col border-border/50 shadow-sm overflow-hidden bg-card">
+      <CardHeader className="pb-3 border-b bg-muted/10">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-primary" />
+            </div>
+            Evolución de Parámetros de Laboratorio
+          </CardTitle>
+          <Badge variant="outline" className="font-normal bg-card">
+            {series.length} series
+          </Badge>
+        </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 gap-3">
+      <CardContent className="flex-1 flex flex-col min-h-0 gap-6 pt-6 bg-card">
         {/* Test selector */}
-        <div className="shrink-0 overflow-x-auto">
-          <div className="flex gap-1.5 pb-1">
+        <div className="shrink-0 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 pb-2 px-1">
             {series.map((s) => (
-              <Badge
+              <button
                 key={s.testName}
-                variant={selectedTest === s.testName ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap text-xs shrink-0 ${
-                  selectedTest === s.testName
-                    ? ""
-                    : "hover:bg-muted"
-                }`}
                 onClick={() => setSelectedTest(s.testName)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all
+                  ${selectedTest === s.testName 
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-105" 
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted border border-border/50"}
+                `}
               >
                 {s.testName}
-                <span className="ml-1 opacity-60">({s.dataPoints.length})</span>
-              </Badge>
+                <span className={`text-[10px] ${selectedTest === s.testName ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>
+                  ({s.dataPoints.length})
+                </span>
+              </button>
             ))}
           </div>
         </div>
 
         {/* Chart */}
         {activeSeries && (
-          <div className="flex-1 min-h-0">
-            <div className="h-full min-h-[200px]">
+          <div className="flex-1 min-h-0 flex flex-col gap-4">
+            <div className="flex-1 min-h-[250px] bg-muted/5 rounded-2xl border border-border/50 p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={activeSeries.dataPoints}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+                  margin={{ top: 10, right: 20, left: -10, bottom: 5 }}
                 >
-                  {/* Reference range area */}
                   <ReferenceArea
                     y1={activeSeries.referenceMin}
                     y2={activeSeries.referenceMax}
                     fill="hsl(var(--muted))"
-                    fillOpacity={0.4}
+                    fillOpacity={0.2}
                     stroke="none"
                   />
 
                   <XAxis
                     dataKey="dateLabel"
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }}
                     tickLine={false}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
+                    axisLine={false}
+                    dy={10}
                   />
                   <YAxis
                     domain={yDomain}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }}
                     tickLine={false}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
+                    axisLine={false}
                     width={45}
                   />
                   <Tooltip
@@ -256,43 +255,46 @@ export function LabChartsPanel({ record }: Props) {
                         referenceMax={activeSeries.referenceMax}
                       />
                     }
+                    cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
                   <Line
                     type="monotone"
                     dataKey="value"
                     stroke="hsl(var(--primary))"
-                    strokeWidth={2}
+                    strokeWidth={3}
                     dot={<CustomDotComponent />}
-                    activeDot={{ r: 7, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+                    activeDot={{ r: 8, stroke: "hsl(var(--background))", strokeWidth: 3 }}
+                    animationDuration={1000}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground px-1">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
-                  Normal
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                  Alerta
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500" />
-                  Crítico
-                </span>
+            {/* Bottom Info / Legend */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 pb-2">
+              <div className="flex items-center gap-4">
+                <LegendItem color="bg-emerald-500" label="Normal" />
+                <LegendItem color="bg-amber-500" label="Alerta" />
+                <LegendItem color="bg-red-500" label="Crítico" />
               </div>
-              <span>
-                Rango ref: {activeSeries.referenceMin}-{activeSeries.referenceMax}{" "}
-                {activeSeries.unit}
-              </span>
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 px-4 py-1.5 rounded-full border border-border/50">
+                <span>Rango Referencia:</span>
+                <span className="text-foreground">{activeSeries.referenceMin} - {activeSeries.referenceMax}</span>
+                <span className="opacity-50">{activeSeries.unit}</span>
+              </div>
             </div>
           </div>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function LegendItem({ color, label }: { color: string, label: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className={`h-2 w-2 rounded-full ${color}`} />
+      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">{label}</span>
+    </div>
   );
 }

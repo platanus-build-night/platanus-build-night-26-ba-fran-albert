@@ -19,7 +19,7 @@ export interface Antecedente {
 }
 
 export interface Evolution {
-  id: number;
+  id: number | string;
   doctorName: string;
   specialty: string;
   date: string;

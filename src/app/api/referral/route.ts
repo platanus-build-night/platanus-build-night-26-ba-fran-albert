@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { streamCompletion } from "@/lib/ai";
 import { REFERRAL_PROMPT } from "@/lib/prompts";
-import { getPatientById, buildPatientContext } from "@/lib/mock-data";
+import { getPatientById, buildPatientContext } from "@/lib/patient-service";
 
 export async function POST(req: NextRequest) {
   let patientId: string;
@@ -16,7 +16,9 @@ export async function POST(req: NextRequest) {
     return new Response("patientId requerido", { status: 400 });
   }
 
-  const record = getPatientById(patientId);
+  const token = req.cookies.get("ehr-token")?.value;
+  const ehrUrl = req.cookies.get("ehr-url")?.value;
+  const record = await getPatientById(patientId, token, ehrUrl);
   if (!record) {
     return new Response("Paciente no encontrado", { status: 404 });
   }

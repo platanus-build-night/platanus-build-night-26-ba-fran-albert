@@ -46,13 +46,13 @@ export function SummaryPanel({ record }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-10">
       {/* Patient Dashboard Card */}
       <PatientInfo record={record} />
 
       {/* AI Summary Section */}
-      <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5 shadow-sm">
-        <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
+      <Card className="border-border/50 bg-card shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 border-b bg-muted/10">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -94,10 +94,10 @@ export function SummaryPanel({ record }: Props) {
           </div>
         </CardHeader>
         
-        <CardContent className="pt-6 min-h-[150px]">
+        <CardContent className="pt-6 min-h-[150px] bg-card">
           {!summary && !loading && !error && (
-            <div className="flex flex-col items-center justify-center py-8 text-center space-y-3 opacity-60">
-              <BrainCircuit className="h-10 w-10 text-muted-foreground/50" />
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 opacity-60">
+              <BrainCircuit className="h-12 w-12 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground max-w-sm">
                 Utilizá la inteligencia artificial para analizar todo el historial del paciente y generar un resumen conciso y relevante.
               </p>
@@ -123,7 +123,7 @@ export function SummaryPanel({ record }: Props) {
           )}
 
           {summary && (
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-foreground prose-p:leading-relaxed bg-card/50 p-4 rounded-xl border border-border/50">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-foreground prose-p:leading-relaxed bg-muted/20 p-6 rounded-xl border border-border/50">
               <ReactMarkdown>{summary}</ReactMarkdown>
             </div>
           )}

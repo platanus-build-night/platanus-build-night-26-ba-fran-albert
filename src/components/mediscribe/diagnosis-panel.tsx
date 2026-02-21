@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Brain, Copy } from "lucide-react";
+import { Loader2, Brain, Copy, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
@@ -70,19 +70,6 @@ export function DiagnosisPanel({ patientId }: Props) {
         }
       }
 
-      buffer += decoder.decode();
-      if (buffer.trimEnd().startsWith("data: ")) {
-        const data = buffer.trimEnd().slice(6);
-        if (data !== "[DONE]") {
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) {
-              fullText += parsed.text;
-            }
-          } catch { /* ignore trailing partial */ }
-        }
-      }
-
       setResult(fullText);
     } catch {
       setResult("Error al generar diagnóstico diferencial. Intentá nuevamente.");
@@ -101,22 +88,24 @@ export function DiagnosisPanel({ patientId }: Props) {
   const displayText = isStreaming ? streamingText : result;
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+    <Card className="h-full flex flex-col overflow-hidden border-border/50 shadow-sm bg-card">
+      <CardHeader className="pb-3 border-b bg-muted/10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            Diagnóstico diferencial
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Brain className="h-4 w-4 text-primary" />
+            </div>
+            Análisis de Diagnóstico Diferencial
           </CardTitle>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             {result && (
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={handleCopy}
-                className="h-7 text-xs"
+                className="h-8 text-xs"
               >
-                <Copy className="h-3 w-3 mr-1" />
+                <Copy className="h-3.5 w-3.5 mr-1.5" />
                 Copiar
               </Button>
             )}
@@ -124,57 +113,64 @@ export function DiagnosisPanel({ patientId }: Props) {
               size="sm"
               onClick={handleDiagnose}
               disabled={isStreaming}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm h-8"
             >
               {isStreaming ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  Analizando...
+                  Procesando...
                 </>
               ) : (
-                "Generar diagnóstico"
+                <>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Generar Análisis
+                </>
               )}
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 gap-3">
-        <Textarea
-          placeholder="(Opcional) Describí la consulta actual para un diagnóstico más preciso..."
-          value={consultaActual}
-          onChange={(e) => setConsultaActual(e.target.value)}
-          className="min-h-[60px] max-h-[100px] resize-none shrink-0"
-          disabled={isStreaming}
-        />
+      <CardContent className="flex-1 flex flex-col min-h-0 gap-4 pt-4 bg-card">
+        <div className="space-y-1.5 px-1">
+          <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Contexto de la Consulta (Opcional)</label>
+          <Textarea
+            placeholder="Describí los síntomas actuales para un análisis más preciso..."
+            value={consultaActual}
+            onChange={(e) => setConsultaActual(e.target.value)}
+            className="min-h-[80px] max-h-[120px] resize-none border-border/50 bg-muted/20 focus-visible:ring-primary/20"
+            disabled={isStreaming}
+          />
+        </div>
 
-        <ScrollArea className="flex-1">
-          {!displayText && !isStreaming && (
-            <div className="text-center py-8 space-y-2">
-              <Brain className="h-8 w-8 mx-auto text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">
-                Generá un análisis de diagnósticos diferenciales basado en la HC
-                del paciente.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Opcionalmente, describí la consulta actual para mayor precisión.
-              </p>
-            </div>
-          )}
+        <div className="flex-1 min-h-0 bg-muted/5 rounded-xl border border-border/50 overflow-hidden flex flex-col">
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              {!displayText && !isStreaming && (
+                <div className="text-center py-12 space-y-3 opacity-60">
+                  <Brain className="h-12 w-12 mx-auto text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    La IA analizará el historial completo del paciente y sugerirá posibles diagnósticos basados en la evidencia clínica.
+                  </p>
+                </div>
+              )}
 
-          {isStreaming && !streamingText && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-primary mr-3" />
-              <span className="text-sm text-muted-foreground">
-                Analizando datos clínicos...
-              </span>
-            </div>
-          )}
+              {isStreaming && !streamingText && (
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground font-medium animate-pulse">
+                    Analizando patrones clínicos...
+                  </span>
+                </div>
+              )}
 
-          {displayText && (
-            <div className="prose prose-sm max-w-none dark:prose-invert pb-2">
-              <ReactMarkdown>{displayText}</ReactMarkdown>
+              {displayText && (
+                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-foreground">
+                  <ReactMarkdown>{displayText}</ReactMarkdown>
+                </div>
+              )}
             </div>
-          )}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, BookOpen, Copy } from "lucide-react";
+import { Loader2, BookOpen, Copy, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
@@ -35,9 +35,8 @@ export function CIE10Panel({ patientId }: Props) {
       });
 
       if (!res.ok) throw new Error("Error del servidor");
-      if (!res.body) throw new Error("Sin cuerpo de respuesta");
 
-      const reader = res.body.getReader();
+      const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "";
       let buffer = "";
@@ -57,35 +56,11 @@ export function CIE10Panel({ patientId }: Props) {
             if (data === "[DONE]") continue;
             try {
               const parsed = JSON.parse(data);
-              if (parsed.error) {
-                throw new Error(parsed.error);
-              }
               if (parsed.text) {
                 fullText += parsed.text;
                 setStreamingText(fullText);
               }
-            } catch (e) {
-              if (
-                e instanceof Error &&
-                e.message !== "Unexpected end of JSON input"
-              )
-                throw e;
-            }
-          }
-        }
-      }
-
-      buffer += decoder.decode();
-      if (buffer.trimEnd().startsWith("data: ")) {
-        const data = buffer.trimEnd().slice(6);
-        if (data !== "[DONE]") {
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.text) {
-              fullText += parsed.text;
-            }
-          } catch {
-            /* ignore trailing partial */
+            } catch (e) { /* ignore */ }
           }
         }
       }
@@ -108,77 +83,89 @@ export function CIE10Panel({ patientId }: Props) {
   const displayText = isStreaming ? streamingText : result;
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+    <Card className="h-full flex flex-col overflow-hidden border-border/50 shadow-sm bg-card">
+      <CardHeader className="pb-3 border-b bg-muted/10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Codificación CIE-10
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <BookOpen className="h-4 w-4 text-primary" />
+            </div>
+            Sugerencias de Codificación CIE-10
           </CardTitle>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             {result && (
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={handleCopy}
-                className="h-7 text-xs"
+                className="h-8 text-xs"
               >
-                <Copy className="h-3 w-3 mr-1" />
+                <Copy className="h-3.5 w-3.5 mr-1.5" />
                 Copiar
               </Button>
             )}
-            <Button size="sm" onClick={handleSuggest} disabled={isStreaming}>
+            <Button 
+              size="sm" 
+              onClick={handleSuggest} 
+              disabled={isStreaming}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm h-8"
+            >
               {isStreaming ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  Generando...
+                  Buscando...
                 </>
               ) : (
-                "Sugerir códigos CIE-10"
+                <>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Sugerir Códigos
+                </>
               )}
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 gap-3">
-        <Textarea
-          placeholder="(Opcional) Agregá contexto diagnóstico adicional para mayor precisión..."
-          value={diagnosticText}
-          onChange={(e) => setDiagnosticText(e.target.value)}
-          className="min-h-[60px] max-h-[100px] resize-none shrink-0"
-          disabled={isStreaming}
-        />
+      <CardContent className="flex-1 flex flex-col min-h-0 gap-4 pt-4 bg-card">
+        <div className="space-y-1.5 px-1">
+          <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Detalles Clínicos Adicionales</label>
+          <Textarea
+            placeholder="Agregá más contexto para obtener códigos más específicos..."
+            value={diagnosticText}
+            onChange={(e) => setDiagnosticText(e.target.value)}
+            className="min-h-[80px] max-h-[120px] resize-none border-border/50 bg-muted/20 focus-visible:ring-primary/20"
+            disabled={isStreaming}
+          />
+        </div>
 
-        <ScrollArea className="flex-1">
-          {!displayText && !isStreaming && (
-            <div className="text-center py-8 space-y-2">
-              <BookOpen className="h-8 w-8 mx-auto text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">
-                Generá sugerencias de códigos CIE-10 basadas en la HC del
-                paciente.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Opcionalmente, agregá contexto diagnóstico para mayor
-                precisión.
-              </p>
-            </div>
-          )}
+        <div className="flex-1 min-h-0 bg-muted/5 rounded-xl border border-border/50 overflow-hidden flex flex-col">
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              {!displayText && !isStreaming && (
+                <div className="text-center py-12 space-y-3 opacity-60">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    La IA identificará los diagnósticos probables y sus correspondientes códigos CIE-10.
+                  </p>
+                </div>
+              )}
 
-          {isStreaming && !streamingText && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-primary mr-3" />
-              <span className="text-sm text-muted-foreground">
-                Analizando datos clínicos...
-              </span>
-            </div>
-          )}
+              {isStreaming && !streamingText && (
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground font-medium animate-pulse">
+                    Consultando catálogo CIE-10...
+                  </span>
+                </div>
+              )}
 
-          {displayText && (
-            <div className="prose prose-sm max-w-none dark:prose-invert pb-2">
-              <ReactMarkdown>{displayText}</ReactMarkdown>
+              {displayText && (
+                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-foreground">
+                  <ReactMarkdown>{displayText}</ReactMarkdown>
+                </div>
+              )}
             </div>
-          )}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
