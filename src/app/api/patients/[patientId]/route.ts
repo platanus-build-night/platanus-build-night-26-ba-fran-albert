@@ -12,7 +12,8 @@ export async function GET(
   }
 
   const token = req.cookies.get("ehr-token")?.value;
-  const record = await getPatientById(patientId, token);
+  const ehrUrl = req.cookies.get("ehr-url")?.value;
+  const record = await getPatientById(patientId, token, ehrUrl);
 
   if (!record) {
     return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });

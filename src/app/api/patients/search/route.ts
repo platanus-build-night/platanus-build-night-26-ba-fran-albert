@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
   }
 
   const token = req.cookies.get("ehr-token")?.value;
-  const results = await searchPatients(query, token);
+  const ehrUrl = req.cookies.get("ehr-url")?.value;
+  const results = await searchPatients(query, token, ehrUrl);
 
   return NextResponse.json(results);
 }

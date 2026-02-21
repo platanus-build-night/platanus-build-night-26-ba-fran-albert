@@ -89,9 +89,9 @@ interface EHRSearchResultDTO {
 // Config helpers
 // ---------------------------------------------------------------------------
 
-function getBaseUrl(): string {
-  const url = process.env.EHR_API_URL;
-  if (!url) throw new Error("EHR_API_URL env var is not set");
+function getBaseUrl(overrideUrl?: string): string {
+  const url = overrideUrl || process.env.EHR_API_URL;
+  if (!url) throw new Error("EHR_API_URL env var is not set and no override URL provided");
   return url.replace(/\/$/, "");
 }
 
@@ -99,12 +99,12 @@ function getEndpoint(envKey: string, defaultPath: string): string {
   return process.env[envKey] || defaultPath;
 }
 
-function buildUrl(pathTemplate: string, params: Record<string, string>): string {
+function buildUrl(pathTemplate: string, params: Record<string, string>, ehrUrl?: string): string {
   let path = pathTemplate;
   for (const [key, val] of Object.entries(params)) {
     path = path.replace(`{${key}}`, encodeURIComponent(val));
   }
-  return `${getBaseUrl()}${path}`;
+  return `${getBaseUrl(ehrUrl)}${path}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,42 +130,43 @@ async function ehrFetch<T>(path: string, token: string): Promise<T> {
 // Resource fetch functions
 // ---------------------------------------------------------------------------
 
-function fetchPatientProfile(patientId: string, token: string) {
+function fetchPatientProfile(patientId: string, token: string, ehrUrl?: string) {
   const endpoint = getEndpoint("EHR_ENDPOINT_PATIENT", "/patient/{id}");
-  return ehrFetch<EHRPatientDTO>(buildUrl(endpoint, { id: patientId }), token);
+  return ehrFetch<EHRPatientDTO>(buildUrl(endpoint, { id: patientId }, ehrUrl), token);
 }
 
-function fetchAntecedentes(patientId: string, token: string) {
+function fetchAntecedentes(patientId: string, token: string, ehrUrl?: string) {
   const endpoint = getEndpoint(
     "EHR_ENDPOINT_ANTECEDENTES",
     "/historia-clinica/{id}/antecedentes",
   );
-  return ehrFetch<EHRAntecedentesDTO[]>(buildUrl(endpoint, { id: patientId }), token);
+  return ehrFetch<EHRAntecedentesDTO[]>(buildUrl(endpoint, { id: patientId }, ehrUrl), token);
 }
 
-function fetchEvoluciones(patientId: string, token: string) {
+function fetchEvoluciones(patientId: string, token: string, ehrUrl?: string) {
   const endpoint = getEndpoint(
     "EHR_ENDPOINT_EVOLUCIONES",
     "/historia-clinica/{id}/evoluciones",
   );
-  return ehrFetch<EHREvolucionDTO[]>(buildUrl(endpoint, { id: patientId }), token);
+  return ehrFetch<EHREvolucionDTO[]>(buildUrl(endpoint, { id: patientId }, ehrUrl), token);
 }
 
-function fetchMedicacion(patientId: string, token: string) {
+function fetchMedicacion(patientId: string, token: string, ehrUrl?: string) {
   const endpoint = getEndpoint(
     "EHR_ENDPOINT_MEDICATION",
     "/historia-clinica/{id}/medicacion-actual",
   );
-  return ehrFetch<EHRMedicationDTO[]>(buildUrl(endpoint, { id: patientId }), token);
+  return ehrFetch<EHRMedicationDTO[]>(buildUrl(endpoint, { id: patientId }, ehrUrl), token);
 }
 
 async function fetchLabResults(
   patientId: string,
   token: string,
+  ehrUrl?: string,
 ): Promise<{ studies: EHRStudyDTO[]; labData: EHRLabDataDTO[] }> {
   const studiesEndpoint = getEndpoint("EHR_ENDPOINT_STUDIES", "/study/byUser/{id}");
   const studies = await ehrFetch<EHRStudyDTO[]>(
-    buildUrl(studiesEndpoint, { id: patientId }),
+    buildUrl(studiesEndpoint, { id: patientId }, ehrUrl),
     token,
   );
 
@@ -177,7 +178,7 @@ async function fetchLabResults(
   );
   const studyIds = studies.map((s) => s.id);
   const queryString = studyIds.map((id) => `studiesIds=${id}`).join("&");
-  const labDataUrl = `${getBaseUrl()}${labDataEndpoint}?${queryString}`;
+  const labDataUrl = `${getBaseUrl(ehrUrl)}${labDataEndpoint}?${queryString}`;
 
   const labData = await ehrFetch<EHRLabDataDTO[]>(labDataUrl, token);
   return { studies, labData };
@@ -186,9 +187,10 @@ async function fetchLabResults(
 export async function searchPatientsEHR(
   query: string,
   token: string,
+  ehrUrl?: string,
 ): Promise<Array<{ id: string; firstName: string; lastName: string; age: number; healthInsurance: string }>> {
   const endpoint = getEndpoint("EHR_ENDPOINT_SEARCH", "/patient/search");
-  const url = `${getBaseUrl()}${endpoint}?q=${encodeURIComponent(query)}`;
+  const url = `${getBaseUrl(ehrUrl)}${endpoint}?q=${encodeURIComponent(query)}`;
   const results = await ehrFetch<EHRSearchResultDTO[]>(url, token);
   return results.map((r) => ({
     id: String(r.userId),
@@ -358,14 +360,15 @@ function mapLabs(
 export async function fetchPatientRecord(
   patientId: string,
   token: string,
+  ehrUrl?: string,
 ): Promise<PatientRecord> {
   const [patientResult, antecResult, evoResult, medsResult, labsResult] =
     await Promise.allSettled([
-      fetchPatientProfile(patientId, token),
-      fetchAntecedentes(patientId, token),
-      fetchEvoluciones(patientId, token),
-      fetchMedicacion(patientId, token),
-      fetchLabResults(patientId, token),
+      fetchPatientProfile(patientId, token, ehrUrl),
+      fetchAntecedentes(patientId, token, ehrUrl),
+      fetchEvoluciones(patientId, token, ehrUrl),
+      fetchMedicacion(patientId, token, ehrUrl),
+      fetchLabResults(patientId, token, ehrUrl),
     ]);
 
   if (patientResult.status === "rejected") {

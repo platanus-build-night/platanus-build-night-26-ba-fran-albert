@@ -10,6 +10,7 @@ import { PatientInfo } from "@/components/mediscribe/patient-info";
 import { SummaryPanel } from "@/components/mediscribe/summary-panel";
 import { EvolutionPanel } from "@/components/mediscribe/evolution-panel";
 import { ChatPanel } from "@/components/mediscribe/chat-panel";
+import { EhrConfigDialog } from "@/components/mediscribe/ehr-config-dialog";
 import type { PatientRecord } from "@/lib/mock-data";
 
 function DemoContent() {
@@ -69,12 +70,25 @@ function DemoContent() {
               {dataMode === "ehr" ? "EHR" : "Demo"}
             </span>
           </div>
-          {selectedPatient && (
-            <span className="text-sm text-muted-foreground">
-              Paciente: {selectedPatient.patient.firstName}{" "}
-              {selectedPatient.patient.lastName}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {selectedPatient && (
+              <span className="text-sm text-muted-foreground">
+                Paciente: {selectedPatient.patient.firstName}{" "}
+                {selectedPatient.patient.lastName}
+              </span>
+            )}
+            <EhrConfigDialog
+              dataMode={dataMode}
+              onConnect={() => {
+                setDataMode("ehr");
+                setSelectedPatient(null);
+              }}
+              onDisconnect={() => {
+                setDataMode("mock");
+                setSelectedPatient(null);
+              }}
+            />
+          </div>
         </div>
       </header>
 

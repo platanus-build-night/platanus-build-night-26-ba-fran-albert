@@ -15,16 +15,17 @@ import {
 } from "./mock-data";
 import { fetchPatientRecord, searchPatientsEHR } from "./ehr-adapter";
 
-function isEhrMode(): boolean {
-  return process.env.DATA_SOURCE === "ehr";
+function isEhrMode(ehrUrl?: string): boolean {
+  return !!ehrUrl || process.env.DATA_SOURCE === "ehr";
 }
 
 export async function getPatientById(
   id: string,
   token?: string,
+  ehrUrl?: string,
 ): Promise<PatientRecord | undefined> {
-  if (isEhrMode() && token) {
-    return await fetchPatientRecord(id, token);
+  if (isEhrMode(ehrUrl) && token) {
+    return await fetchPatientRecord(id, token, ehrUrl);
   }
   return getMockPatient(id);
 }
@@ -40,9 +41,10 @@ export interface PatientSearchResult {
 export async function searchPatients(
   query: string,
   token?: string,
+  ehrUrl?: string,
 ): Promise<PatientSearchResult[]> {
-  if (isEhrMode() && token) {
-    return await searchPatientsEHR(query, token);
+  if (isEhrMode(ehrUrl) && token) {
+    return await searchPatientsEHR(query, token, ehrUrl);
   }
 
   const q = query.toLowerCase();
