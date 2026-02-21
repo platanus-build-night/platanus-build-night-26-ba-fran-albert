@@ -133,6 +133,28 @@ export const PATIENTS: PatientRecord[] = [
       { name: "Bisoprolol 2.5mg", dose: "1 comprimido", frequency: "Una vez al dia", status: "ACTIVE", startDate: "2020-05-10" },
     ],
     labs: [
+      // 2025-03-15
+      { testName: "Glucemia", value: 145, unit: "mg/dL", referenceMin: 70, referenceMax: 110, alert: "warning", date: "2025-03-15" },
+      { testName: "HbA1c", value: 7.8, unit: "%", referenceMin: 4, referenceMax: 6.5, alert: "warning", date: "2025-03-15" },
+      { testName: "Colesterol total", value: 220, unit: "mg/dL", referenceMin: 0, referenceMax: 200, alert: "warning", date: "2025-03-15" },
+      { testName: "LDL", value: 130, unit: "mg/dL", referenceMin: 0, referenceMax: 100, alert: "warning", date: "2025-03-15" },
+      { testName: "Creatinina", value: 1.0, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "normal", date: "2025-03-15" },
+      { testName: "Hemoglobina", value: 14.5, unit: "g/dL", referenceMin: 13, referenceMax: 17, alert: "normal", date: "2025-03-15" },
+      // 2025-08-10
+      { testName: "Glucemia", value: 135, unit: "mg/dL", referenceMin: 70, referenceMax: 110, alert: "warning", date: "2025-08-10" },
+      { testName: "HbA1c", value: 7.5, unit: "%", referenceMin: 4, referenceMax: 6.5, alert: "warning", date: "2025-08-10" },
+      { testName: "Colesterol total", value: 198, unit: "mg/dL", referenceMin: 0, referenceMax: 200, alert: "normal", date: "2025-08-10" },
+      { testName: "LDL", value: 105, unit: "mg/dL", referenceMin: 0, referenceMax: 100, alert: "warning", date: "2025-08-10" },
+      { testName: "Creatinina", value: 1.05, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "normal", date: "2025-08-10" },
+      { testName: "Hemoglobina", value: 14.0, unit: "g/dL", referenceMin: 13, referenceMax: 17, alert: "normal", date: "2025-08-10" },
+      // 2025-11-20
+      { testName: "Glucemia", value: 132, unit: "mg/dL", referenceMin: 70, referenceMax: 110, alert: "warning", date: "2025-11-20" },
+      { testName: "HbA1c", value: 7.3, unit: "%", referenceMin: 4, referenceMax: 6.5, alert: "warning", date: "2025-11-20" },
+      { testName: "Colesterol total", value: 190, unit: "mg/dL", referenceMin: 0, referenceMax: 200, alert: "normal", date: "2025-11-20" },
+      { testName: "LDL", value: 95, unit: "mg/dL", referenceMin: 0, referenceMax: 100, alert: "normal", date: "2025-11-20" },
+      { testName: "Creatinina", value: 1.08, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "normal", date: "2025-11-20" },
+      { testName: "Hemoglobina", value: 14.3, unit: "g/dL", referenceMin: 13, referenceMax: 17, alert: "normal", date: "2025-11-20" },
+      // 2026-01-22
       { testName: "Glucemia", value: 128, unit: "mg/dL", referenceMin: 70, referenceMax: 110, alert: "warning", date: "2026-01-22" },
       { testName: "HbA1c", value: 7.2, unit: "%", referenceMin: 4, referenceMax: 6.5, alert: "warning", date: "2026-01-22" },
       { testName: "Colesterol total", value: 185, unit: "mg/dL", referenceMin: 0, referenceMax: 200, alert: "normal", date: "2026-01-22" },
@@ -403,6 +425,17 @@ export const PATIENTS: PatientRecord[] = [
       { name: "Oxigeno domiciliario", dose: "2 L/min", frequency: "Nocturno (8hs)", status: "ACTIVE", startDate: "2022-01-01" },
     ],
     labs: [
+      // 2025-06-15
+      { testName: "Creatinina", value: 1.5, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "warning", date: "2025-06-15" },
+      { testName: "Potasio", value: 4.8, unit: "mEq/L", referenceMin: 3.5, referenceMax: 5.0, alert: "normal", date: "2025-06-15" },
+      { testName: "BNP", value: 450, unit: "pg/mL", referenceMin: 0, referenceMax: 100, alert: "critical", date: "2025-06-15" },
+      { testName: "Hemoglobina", value: 12.5, unit: "g/dL", referenceMin: 13, referenceMax: 17, alert: "warning", date: "2025-06-15" },
+      // 2025-10-20
+      { testName: "Creatinina", value: 1.6, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "warning", date: "2025-10-20" },
+      { testName: "Potasio", value: 5.1, unit: "mEq/L", referenceMin: 3.5, referenceMax: 5.0, alert: "warning", date: "2025-10-20" },
+      { testName: "BNP", value: 620, unit: "pg/mL", referenceMin: 0, referenceMax: 100, alert: "critical", date: "2025-10-20" },
+      { testName: "Hemoglobina", value: 12.0, unit: "g/dL", referenceMin: 13, referenceMax: 17, alert: "warning", date: "2025-10-20" },
+      // 2026-02-18
       { testName: "Creatinina", value: 1.8, unit: "mg/dL", referenceMin: 0.7, referenceMax: 1.3, alert: "critical", date: "2026-02-18" },
       { testName: "Urea", value: 68, unit: "mg/dL", referenceMin: 10, referenceMax: 50, alert: "warning", date: "2026-02-18" },
       { testName: "Potasio", value: 5.4, unit: "mEq/L", referenceMin: 3.5, referenceMax: 5.0, alert: "warning", date: "2026-02-18" },

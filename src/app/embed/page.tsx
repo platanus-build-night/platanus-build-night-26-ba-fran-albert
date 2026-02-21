@@ -6,6 +6,11 @@ import { EvolutionPanel } from "@/components/mediscribe/evolution-panel";
 import { ChatPanel } from "@/components/mediscribe/chat-panel";
 import { DiagnosisPanel } from "@/components/mediscribe/diagnosis-panel";
 import { SummaryPanel } from "@/components/mediscribe/summary-panel";
+import { TimelinePanel } from "@/components/mediscribe/timeline-panel";
+import { LabChartsPanel } from "@/components/mediscribe/lab-charts-panel";
+import { InteractionsPanel } from "@/components/mediscribe/interactions-panel";
+import { CIE10Panel } from "@/components/mediscribe/cie10-panel";
+import { PrescriptionPanel } from "@/components/mediscribe/prescription-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from "lucide-react";
 import { PATIENTS } from "@/lib/mock-data";
@@ -56,22 +61,53 @@ function EmbedContent() {
             <TabsTrigger value="chat" className="text-xs">
               Chat
             </TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs">
+              Timeline
+            </TabsTrigger>
+            <TabsTrigger value="labs" className="text-xs">
+              Labs
+            </TabsTrigger>
+            <TabsTrigger value="interactions" className="text-xs">
+              Interacciones
+            </TabsTrigger>
+            <TabsTrigger value="cie10" className="text-xs">
+              CIE-10
+            </TabsTrigger>
+            <TabsTrigger value="prescription" className="text-xs">
+              Receta
+            </TabsTrigger>
           </TabsList>
           <div className="flex-1 mt-2 min-h-0">
             <TabsContent value="evolution" className="h-full mt-0">
-              <EvolutionPanel patientId={record.patient.id} />
+              <EvolutionPanel key={record.patient.id} patientId={record.patient.id} />
             </TabsContent>
             <TabsContent value="summary" className="h-full mt-0">
-              <SummaryPanel patientId={record.patient.id} />
+              <SummaryPanel key={record.patient.id} patientId={record.patient.id} />
             </TabsContent>
             <TabsContent value="diagnosis" className="h-full mt-0">
-              <DiagnosisPanel patientId={record.patient.id} />
+              <DiagnosisPanel key={record.patient.id} patientId={record.patient.id} />
             </TabsContent>
             <TabsContent value="chat" className="h-full mt-0">
               <ChatPanel
+                key={record.patient.id}
                 patientId={record.patient.id}
                 patientName={patientName}
               />
+            </TabsContent>
+            <TabsContent value="timeline" className="h-full mt-0">
+              <TimelinePanel key={record.patient.id} record={record} />
+            </TabsContent>
+            <TabsContent value="labs" className="h-full mt-0">
+              <LabChartsPanel key={record.patient.id} record={record} />
+            </TabsContent>
+            <TabsContent value="interactions" className="h-full mt-0">
+              <InteractionsPanel key={record.patient.id} patientId={record.patient.id} />
+            </TabsContent>
+            <TabsContent value="cie10" className="h-full mt-0">
+              <CIE10Panel key={record.patient.id} patientId={record.patient.id} />
+            </TabsContent>
+            <TabsContent value="prescription" className="h-full mt-0">
+              <PrescriptionPanel key={record.patient.id} record={record} />
             </TabsContent>
           </div>
         </Tabs>

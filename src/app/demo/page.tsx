@@ -11,6 +11,11 @@ import { SummaryPanel } from "@/components/mediscribe/summary-panel";
 import { EvolutionPanel } from "@/components/mediscribe/evolution-panel";
 import { ChatPanel } from "@/components/mediscribe/chat-panel";
 import { DiagnosisPanel } from "@/components/mediscribe/diagnosis-panel";
+import { TimelinePanel } from "@/components/mediscribe/timeline-panel";
+import { LabChartsPanel } from "@/components/mediscribe/lab-charts-panel";
+import { InteractionsPanel } from "@/components/mediscribe/interactions-panel";
+import { CIE10Panel } from "@/components/mediscribe/cie10-panel";
+import { PrescriptionPanel } from "@/components/mediscribe/prescription-panel";
 import type { PatientRecord } from "@/lib/mock-data";
 
 export default function DemoPage() {
@@ -124,6 +129,21 @@ export default function DemoPage() {
                     <TabsTrigger value="chat" className="text-xs sm:text-sm">
                       Chat IA
                     </TabsTrigger>
+                    <TabsTrigger value="timeline" className="text-xs sm:text-sm">
+                      Timeline
+                    </TabsTrigger>
+                    <TabsTrigger value="labs" className="text-xs sm:text-sm">
+                      Labs
+                    </TabsTrigger>
+                    <TabsTrigger value="interactions" className="text-xs sm:text-sm">
+                      Interacciones
+                    </TabsTrigger>
+                    <TabsTrigger value="cie10" className="text-xs sm:text-sm">
+                      CIE-10
+                    </TabsTrigger>
+                    <TabsTrigger value="prescription" className="text-xs sm:text-sm">
+                      Receta
+                    </TabsTrigger>
                     <TabsTrigger
                       value="patient"
                       className="text-xs sm:text-sm md:hidden"
@@ -155,6 +175,36 @@ export default function DemoPage() {
                         key={selectedPatient.patient.id}
                         patientId={selectedPatient.patient.id}
                         patientName={`${selectedPatient.patient.firstName} ${selectedPatient.patient.lastName}`}
+                      />
+                    </TabsContent>
+                    <TabsContent value="timeline" className="h-full mt-0">
+                      <TimelinePanel
+                        key={`timeline-${selectedPatient.patient.id}`}
+                        record={selectedPatient}
+                      />
+                    </TabsContent>
+                    <TabsContent value="labs" className="h-full mt-0">
+                      <LabChartsPanel
+                        key={`labs-${selectedPatient.patient.id}`}
+                        record={selectedPatient}
+                      />
+                    </TabsContent>
+                    <TabsContent value="interactions" className="h-full mt-0">
+                      <InteractionsPanel
+                        key={`interactions-${selectedPatient.patient.id}`}
+                        patientId={selectedPatient.patient.id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="cie10" className="h-full mt-0">
+                      <CIE10Panel
+                        key={`cie10-${selectedPatient.patient.id}`}
+                        patientId={selectedPatient.patient.id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="prescription" className="h-full mt-0">
+                      <PrescriptionPanel
+                        key={`prescription-${selectedPatient.patient.id}`}
+                        record={selectedPatient}
                       />
                     </TabsContent>
                     <TabsContent
