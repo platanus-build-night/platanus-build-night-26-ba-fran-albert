@@ -45,6 +45,11 @@ export default function DemoPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
+  // Solo chat y evolution necesitan layout fijo (input abajo / side-by-side)
+  // El resto scrollea naturalmente con el contenedor padre
+  const fixedTabs = ["chat", "evolution"];
+  const isFixedLayout = fixedTabs.includes(activeTab);
+
   return (
     <div className="h-screen w-full flex overflow-hidden bg-background">
       {/* Mobile Sidebar Overlay */}
@@ -157,7 +162,7 @@ export default function DemoPage() {
 
             {/* Tabs & Panels */}
             <Tabs 
-              defaultValue="evolution" 
+              defaultValue="dashboard" 
               value={activeTab} 
               onValueChange={setActiveTab}
               className="flex-1 flex flex-col overflow-hidden"
@@ -178,9 +183,9 @@ export default function DemoPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto bg-muted/10 p-4 md:p-6">
-                <div className="max-w-6xl mx-auto h-full flex flex-col">
+                <div className={`max-w-6xl mx-auto flex flex-col ${isFixedLayout ? "h-full" : ""}`}>
                   {/* We use key to force re-mount when patient changes for clean state */}
-                  <TabsContent value="dashboard" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="dashboard" className="mt-0 focus-visible:ring-0">
                     <DashboardPanel key={`dash-${selectedPatient.patient.id}`} record={selectedPatient} />
                   </TabsContent>
 
@@ -196,31 +201,31 @@ export default function DemoPage() {
                     />
                   </TabsContent>
 
-                  <TabsContent value="summary" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="summary" className="mt-0 focus-visible:ring-0">
                     <SummaryPanel key={selectedPatient.patient.id} record={selectedPatient} />
                   </TabsContent>
 
-                  <TabsContent value="timeline" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="timeline" className="mt-0 focus-visible:ring-0">
                     <TimelinePanel key={`timeline-${selectedPatient.patient.id}`} record={selectedPatient} />
                   </TabsContent>
 
-                  <TabsContent value="labs" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="labs" className="mt-0 focus-visible:ring-0">
                     <LabChartsPanel key={`labs-${selectedPatient.patient.id}`} record={selectedPatient} />
                   </TabsContent>
 
-                  <TabsContent value="prescription" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="prescription" className="mt-0 focus-visible:ring-0">
                      <PrescriptionPanel key={`presc-${selectedPatient.patient.id}`} record={selectedPatient} />
                   </TabsContent>
 
-                  <TabsContent value="diagnosis" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="diagnosis" className="mt-0 focus-visible:ring-0">
                     <DiagnosisPanel key={`diag-${selectedPatient.patient.id}`} patientId={selectedPatient.patient.id} />
                   </TabsContent>
 
-                  <TabsContent value="patient-summary" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="patient-summary" className="mt-0 focus-visible:ring-0">
                     <PatientSummaryPanel key={`psummary-${selectedPatient.patient.id}`} record={selectedPatient} />
                   </TabsContent>
 
-                  <TabsContent value="referral" className="mt-0 h-full focus-visible:ring-0">
+                  <TabsContent value="referral" className="mt-0 focus-visible:ring-0">
                     <ReferralPanel key={`referral-${selectedPatient.patient.id}`} patientId={selectedPatient.patient.id} />
                   </TabsContent>
                 </div>
