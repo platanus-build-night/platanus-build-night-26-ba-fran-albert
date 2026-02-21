@@ -11,6 +11,9 @@ import { LabChartsPanel } from "@/components/mediscribe/lab-charts-panel";
 import { InteractionsPanel } from "@/components/mediscribe/interactions-panel";
 import { CIE10Panel } from "@/components/mediscribe/cie10-panel";
 import { PrescriptionPanel } from "@/components/mediscribe/prescription-panel";
+import { DashboardPanel } from "@/components/mediscribe/dashboard-panel";
+import { PatientSummaryPanel } from "@/components/mediscribe/patient-summary-panel";
+import { ReferralPanel } from "@/components/mediscribe/referral-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from "lucide-react";
 import { PATIENTS } from "@/lib/mock-data";
@@ -48,7 +51,10 @@ function EmbedContent() {
       {/* Content */}
       <div className="flex-1 p-3 min-h-0">
         <Tabs defaultValue={tabParam} className="h-full flex flex-col">
-          <TabsList className="shrink-0">
+          <TabsList className="shrink-0 overflow-x-auto">
+            <TabsTrigger value="dashboard" className="text-xs">
+              Dashboard
+            </TabsTrigger>
             <TabsTrigger value="evolution" className="text-xs">
               Evolución
             </TabsTrigger>
@@ -76,13 +82,22 @@ function EmbedContent() {
             <TabsTrigger value="prescription" className="text-xs">
               Receta
             </TabsTrigger>
+            <TabsTrigger value="patient-summary" className="text-xs">
+              Para Paciente
+            </TabsTrigger>
+            <TabsTrigger value="referral" className="text-xs">
+              Derivaciones
+            </TabsTrigger>
           </TabsList>
           <div className="flex-1 mt-2 min-h-0">
+            <TabsContent value="dashboard" className="h-full mt-0">
+              <DashboardPanel key={`dash-${record.patient.id}`} record={record} />
+            </TabsContent>
             <TabsContent value="evolution" className="h-full mt-0">
               <EvolutionPanel key={record.patient.id} patientId={record.patient.id} />
             </TabsContent>
             <TabsContent value="summary" className="h-full mt-0">
-              <SummaryPanel key={record.patient.id} patientId={record.patient.id} />
+              <SummaryPanel key={record.patient.id} record={record} />
             </TabsContent>
             <TabsContent value="diagnosis" className="h-full mt-0">
               <DiagnosisPanel key={record.patient.id} patientId={record.patient.id} />
@@ -108,6 +123,12 @@ function EmbedContent() {
             </TabsContent>
             <TabsContent value="prescription" className="h-full mt-0">
               <PrescriptionPanel key={record.patient.id} record={record} />
+            </TabsContent>
+            <TabsContent value="patient-summary" className="h-full mt-0">
+              <PatientSummaryPanel key={`psummary-${record.patient.id}`} record={record} />
+            </TabsContent>
+            <TabsContent value="referral" className="h-full mt-0">
+              <ReferralPanel key={`referral-${record.patient.id}`} patientId={record.patient.id} />
             </TabsContent>
           </div>
         </Tabs>

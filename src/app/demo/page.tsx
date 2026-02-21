@@ -2,11 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowLeft, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sparkles,
+  ArrowLeft,
+  Menu,
+  X,
+  FileText,
+  Activity,
+  MessageSquare,
+  FlaskConical,
+  Clock,
+  Pill,
+  BookOpen,
+  LayoutDashboard,
+  Heart,
+  UserPlus,
+} from "lucide-react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { PatientSelector } from "@/components/mediscribe/patient-selector";
-import { PatientInfo } from "@/components/mediscribe/patient-info";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sidebar } from "@/components/mediscribe/sidebar"; // New sidebar
+import { PatientInfo } from "@/components/mediscribe/patient-info"; // Will need refactor later
 import { SummaryPanel } from "@/components/mediscribe/summary-panel";
 import { EvolutionPanel } from "@/components/mediscribe/evolution-panel";
 import { ChatPanel } from "@/components/mediscribe/chat-panel";
@@ -16,217 +34,233 @@ import { LabChartsPanel } from "@/components/mediscribe/lab-charts-panel";
 import { InteractionsPanel } from "@/components/mediscribe/interactions-panel";
 import { CIE10Panel } from "@/components/mediscribe/cie10-panel";
 import { PrescriptionPanel } from "@/components/mediscribe/prescription-panel";
+import { DashboardPanel } from "@/components/mediscribe/dashboard-panel";
+import { PatientSummaryPanel } from "@/components/mediscribe/patient-summary-panel";
+import { ReferralPanel } from "@/components/mediscribe/referral-panel";
+import { ModeToggle } from "@/components/mode-toggle";
 import type { PatientRecord } from "@/lib/mock-data";
 
 export default function DemoPage() {
-  const [selectedPatient, setSelectedPatient] =
-    useState<PatientRecord | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="border-b shrink-0">
-        <div className="px-4 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 md:hidden"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              {sidebarOpen ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
-            </Button>
-            <Link
-              href="/"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="font-semibold text-sm">MediScribe</span>
-            </div>
-            <span className="text-xs text-muted-foreground border rounded px-1.5 py-0.5">
-              Demo
-            </span>
-          </div>
-          {selectedPatient && (
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Paciente: {selectedPatient.patient.firstName}{" "}
-              {selectedPatient.patient.lastName}
-            </span>
-          )}
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="flex-1 flex min-h-0 relative">
-        {/* Mobile sidebar overlay */}
+    <div className="h-screen w-full flex overflow-hidden bg-background">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
         {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
         )}
+      </AnimatePresence>
 
-        {/* Sidebar */}
-        <aside
-          className={`
-            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            md:translate-x-0 fixed md:static z-40 md:z-auto
-            w-64 border-r p-3 overflow-auto shrink-0 bg-background
-            transition-transform duration-200 h-[calc(100vh-48px)] md:h-auto
-          `}
-        >
-          <PatientSelector
-            selectedId={selectedPatient?.patient.id ?? null}
-            onSelect={(p) => {
-              setSelectedPatient(p);
-              setSidebarOpen(false);
-            }}
-          />
-        </aside>
-
-        {/* Main */}
-        <main className="flex-1 flex min-h-0">
-          {!selectedPatient ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <Sparkles className="h-8 w-8 mx-auto text-muted-foreground/50" />
-                <p className="text-muted-foreground">
-                  Seleccioná un paciente para empezar
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col md:flex-row min-h-0">
-              {/* Patient info sidebar - hidden on mobile, shown in tabs instead */}
-              <div className="hidden md:block w-72 border-r p-4 overflow-auto shrink-0">
-                <PatientInfo record={selectedPatient} />
-              </div>
-
-              {/* AI Panels */}
-              <div className="flex-1 p-3 md:p-4 min-h-0">
-                <Tabs
-                  defaultValue="evolution"
-                  className="h-full flex flex-col"
-                >
-                  <TabsList className="shrink-0 flex-wrap h-auto gap-1">
-                    <TabsTrigger value="evolution" className="text-xs sm:text-sm">
-                      Evolución
-                    </TabsTrigger>
-                    <TabsTrigger value="summary" className="text-xs sm:text-sm">
-                      Resumen HC
-                    </TabsTrigger>
-                    <TabsTrigger value="diagnosis" className="text-xs sm:text-sm">
-                      Diagnóstico
-                    </TabsTrigger>
-                    <TabsTrigger value="chat" className="text-xs sm:text-sm">
-                      Chat IA
-                    </TabsTrigger>
-                    <TabsTrigger value="timeline" className="text-xs sm:text-sm">
-                      Timeline
-                    </TabsTrigger>
-                    <TabsTrigger value="labs" className="text-xs sm:text-sm">
-                      Labs
-                    </TabsTrigger>
-                    <TabsTrigger value="interactions" className="text-xs sm:text-sm">
-                      Interacciones
-                    </TabsTrigger>
-                    <TabsTrigger value="cie10" className="text-xs sm:text-sm">
-                      CIE-10
-                    </TabsTrigger>
-                    <TabsTrigger value="prescription" className="text-xs sm:text-sm">
-                      Receta
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="patient"
-                      className="text-xs sm:text-sm md:hidden"
-                    >
-                      Paciente
-                    </TabsTrigger>
-                  </TabsList>
-                  <div className="flex-1 mt-3 min-h-0">
-                    <TabsContent value="evolution" className="h-full mt-0">
-                      <EvolutionPanel
-                        key={selectedPatient.patient.id}
-                        patientId={selectedPatient.patient.id}
-                      />
-                    </TabsContent>
-                    <TabsContent value="summary" className="h-full mt-0">
-                      <SummaryPanel
-                        key={selectedPatient.patient.id}
-                        patientId={selectedPatient.patient.id}
-                      />
-                    </TabsContent>
-                    <TabsContent value="diagnosis" className="h-full mt-0">
-                      <DiagnosisPanel
-                        key={selectedPatient.patient.id}
-                        patientId={selectedPatient.patient.id}
-                      />
-                    </TabsContent>
-                    <TabsContent value="chat" className="h-full mt-0">
-                      <ChatPanel
-                        key={selectedPatient.patient.id}
-                        patientId={selectedPatient.patient.id}
-                        patientName={`${selectedPatient.patient.firstName} ${selectedPatient.patient.lastName}`}
-                      />
-                    </TabsContent>
-                    <TabsContent value="timeline" className="h-full mt-0">
-                      <TimelinePanel
-                        key={`timeline-${selectedPatient.patient.id}`}
-                        record={selectedPatient}
-                      />
-                    </TabsContent>
-                    <TabsContent value="labs" className="h-full mt-0">
-                      <LabChartsPanel
-                        key={`labs-${selectedPatient.patient.id}`}
-                        record={selectedPatient}
-                      />
-                    </TabsContent>
-                    <TabsContent value="interactions" className="h-full mt-0">
-                      <InteractionsPanel
-                        key={`interactions-${selectedPatient.patient.id}`}
-                        patientId={selectedPatient.patient.id}
-                      />
-                    </TabsContent>
-                    <TabsContent value="cie10" className="h-full mt-0">
-                      <CIE10Panel
-                        key={`cie10-${selectedPatient.patient.id}`}
-                        patientId={selectedPatient.patient.id}
-                      />
-                    </TabsContent>
-                    <TabsContent value="prescription" className="h-full mt-0">
-                      <PrescriptionPanel
-                        key={`prescription-${selectedPatient.patient.id}`}
-                        record={selectedPatient}
-                      />
-                    </TabsContent>
-                    <TabsContent
-                      value="patient"
-                      className="h-full mt-0 md:hidden overflow-auto"
-                    >
-                      <Card className="h-full">
-                        <CardContent className="p-4">
-                          <PatientInfo record={selectedPatient} />
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </div>
-            </div>
-          )}
-        </main>
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
+        <Sidebar 
+          selectedId={selectedPatient?.patient.id ?? null}
+          onSelect={(p) => {
+            setSelectedPatient(p);
+            setSidebarOpen(false);
+          }}
+        />
       </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Header (Mobile & Desktop) */}
+        <header className="h-16 border-b flex items-center justify-between px-4 md:px-6 bg-background/50 backdrop-blur-xl shrink-0 z-10 sticky top-0">
+          <div className="flex items-center gap-3 md:hidden">
+             <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <span className="font-semibold">MediScribe</span>
+          </div>
+
+          {/* Breadcrumbs / Title */}
+          <div className="hidden md:flex items-center text-sm text-muted-foreground">
+             <Link href="/" className="hover:text-foreground transition-colors mr-2">
+               Inicio
+             </Link>
+             <span className="text-muted-foreground/40 mx-2">/</span>
+             <span className="font-medium text-foreground">
+               {selectedPatient 
+                 ? `${selectedPatient.patient.firstName} ${selectedPatient.patient.lastName}` 
+                 : "Seleccionar Paciente"}
+             </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>Nueva Consulta</span>
+            </Button>
+            <Avatar className="h-8 w-8 ml-2 md:hidden">
+              <AvatarFallback>DR</AvatarFallback>
+            </Avatar>
+          </div>
+        </header>
+
+        {/* Dynamic Content */}
+        {!selectedPatient ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+            <div className="bg-primary/5 p-6 rounded-full mb-6 ring-1 ring-primary/10">
+              <Sparkles className="h-10 w-10 text-primary" />
+            </div>
+            <h2 className="text-2xl font-semibold tracking-tight mb-2">Bienvenido a MediScribe</h2>
+            <p className="text-muted-foreground max-w-md mx-auto mb-8">
+              Seleccioná un paciente de la barra lateral para comenzar a documentar, ver su historia clínica o interactuar con el asistente IA.
+            </p>
+            <Button onClick={() => setSidebarOpen(true)} className="md:hidden">
+              Ver Pacientes
+            </Button>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Patient Header / Summary Strip */}
+            <div className="px-6 py-4 bg-muted/30 border-b shrink-0">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <h1 className="text-2xl font-bold tracking-tight">
+                     {selectedPatient.patient.firstName} {selectedPatient.patient.lastName}
+                   </h1>
+                   <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                     <span className="flex items-center gap-1.5">
+                       <Clock className="h-3.5 w-3.5" />
+                       Última visita: Hace 2 meses
+                     </span>
+                     <span className="text-muted-foreground/30">•</span>
+                     <span>{selectedPatient.patient.age} años</span>
+                     <span className="text-muted-foreground/30">•</span>
+                     <span>{selectedPatient.patient.healthInsurance}</span>
+                   </div>
+                 </div>
+                 {/* Status Badge */}
+                 <div className="hidden sm:block px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium border border-green-500/20">
+                   Activo
+                 </div>
+               </div>
+            </div>
+
+            {/* Tabs & Panels */}
+            <Tabs 
+              defaultValue="evolution" 
+              value={activeTab} 
+              onValueChange={setActiveTab}
+              className="flex-1 flex flex-col overflow-hidden"
+            >
+              <div className="px-6 pt-2 border-b bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+                <TabsList className="h-12 bg-transparent p-0 gap-6 w-full justify-start overflow-x-auto no-scrollbar">
+                  <TabItem value="dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" isActive={activeTab === "dashboard"} />
+                  <TabItem value="evolution" icon={<FileText className="h-4 w-4" />} label="Evolución" isActive={activeTab === "evolution"} />
+                  <TabItem value="chat" icon={<MessageSquare className="h-4 w-4" />} label="Chat IA" isActive={activeTab === "chat"} />
+                  <TabItem value="summary" icon={<Activity className="h-4 w-4" />} label="Resumen" isActive={activeTab === "summary"} />
+                  <TabItem value="timeline" icon={<Clock className="h-4 w-4" />} label="Historia" isActive={activeTab === "timeline"} />
+                  <TabItem value="labs" icon={<FlaskConical className="h-4 w-4" />} label="Laboratorio" isActive={activeTab === "labs"} />
+                  <TabItem value="prescription" icon={<Pill className="h-4 w-4" />} label="Receta" isActive={activeTab === "prescription"} />
+                  <TabItem value="diagnosis" icon={<BookOpen className="h-4 w-4" />} label="Diagnóstico" isActive={activeTab === "diagnosis"} />
+                  <TabItem value="patient-summary" icon={<Heart className="h-4 w-4" />} label="Para Paciente" isActive={activeTab === "patient-summary"} />
+                  <TabItem value="referral" icon={<UserPlus className="h-4 w-4" />} label="Derivaciones" isActive={activeTab === "referral"} />
+                </TabsList>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-muted/10 p-4 md:p-6">
+                <div className="max-w-6xl mx-auto h-full flex flex-col">
+                  {/* We use key to force re-mount when patient changes for clean state */}
+                  <TabsContent value="dashboard" className="mt-0 h-full focus-visible:ring-0">
+                    <DashboardPanel key={`dash-${selectedPatient.patient.id}`} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="evolution" className="mt-0 h-full focus-visible:ring-0">
+                    <EvolutionPanel key={selectedPatient.patient.id} patientId={selectedPatient.patient.id} />
+                  </TabsContent>
+                  
+                  <TabsContent value="chat" className="mt-0 h-full focus-visible:ring-0">
+                    <ChatPanel 
+                      key={selectedPatient.patient.id} 
+                      patientId={selectedPatient.patient.id}
+                      patientName={`${selectedPatient.patient.firstName} ${selectedPatient.patient.lastName}`}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="summary" className="mt-0 h-full focus-visible:ring-0">
+                    <SummaryPanel key={selectedPatient.patient.id} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="timeline" className="mt-0 h-full focus-visible:ring-0">
+                    <TimelinePanel key={`timeline-${selectedPatient.patient.id}`} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="labs" className="mt-0 h-full focus-visible:ring-0">
+                    <LabChartsPanel key={`labs-${selectedPatient.patient.id}`} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="prescription" className="mt-0 h-full focus-visible:ring-0">
+                     <PrescriptionPanel key={`presc-${selectedPatient.patient.id}`} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="diagnosis" className="mt-0 h-full focus-visible:ring-0">
+                    <DiagnosisPanel key={`diag-${selectedPatient.patient.id}`} patientId={selectedPatient.patient.id} />
+                  </TabsContent>
+
+                  <TabsContent value="patient-summary" className="mt-0 h-full focus-visible:ring-0">
+                    <PatientSummaryPanel key={`psummary-${selectedPatient.patient.id}`} record={selectedPatient} />
+                  </TabsContent>
+
+                  <TabsContent value="referral" className="mt-0 h-full focus-visible:ring-0">
+                    <ReferralPanel key={`referral-${selectedPatient.patient.id}`} patientId={selectedPatient.patient.id} />
+                  </TabsContent>
+                </div>
+              </div>
+            </Tabs>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
 
-// Import Card for mobile patient tab
-import { Card, CardContent } from "@/components/ui/card";
+// Custom Tab Item for better styling
+function TabItem({ value, icon, label, isActive }: { value: string, icon: React.ReactNode, label: string, isActive: boolean }) {
+  return (
+    <TabsTrigger 
+      value={value}
+      className={`
+        relative h-12 rounded-none border-b-2 border-transparent bg-transparent px-2 pb-3 pt-2 font-medium text-muted-foreground shadow-none transition-none focus-visible:ring-0
+        data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none
+        hover:text-foreground
+      `}
+    >
+      <div className="flex items-center gap-2">
+        {icon}
+        <span>{label}</span>
+      </div>
+      {isActive && (
+        <motion.div
+          layoutId="active-tab-indicator"
+          className="absolute bottom-[-2px] left-0 right-0 h-0.5 bg-primary"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        />
+      )}
+    </TabsTrigger>
+  );
+}
+
+// Helper Avatar component since I removed the import from ui/avatar in the main file to avoid conflict?
+// Actually I imported it above.
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

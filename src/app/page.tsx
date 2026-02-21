@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 import {
   Sparkles,
   Mic,
@@ -39,7 +40,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden transition-colors duration-300">
       {/* Animated background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="orb orb-1" />
@@ -49,7 +50,7 @@ export default function Home() {
       </div>
 
       {/* Nav */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/50 border-b border-white/[0.06]">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/50 border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -60,6 +61,7 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <ModeToggle />
             <a
               href="https://github.com/platanus-build-night/platanus-build-night-26-ba-fran-albert"
               target="_blank"
@@ -83,7 +85,7 @@ export default function Home() {
       <section className="relative min-h-[92vh] flex items-center justify-center px-6">
         <div className="max-w-4xl mx-auto text-center hero-stagger">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2.5 shimmer-badge border border-white/10 rounded-full px-5 py-2 text-sm text-muted-foreground bg-white/[0.03] backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2.5 shimmer-badge border border-border/60 rounded-full px-5 py-2 text-sm text-muted-foreground bg-muted/20 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -126,7 +128,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-base px-8 h-12 border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-300"
+                className="text-base px-8 h-12 border-border/60 bg-muted/20 hover:bg-muted/40 transition-all duration-300"
               >
                 <Github className="h-4 w-4 mr-2" />
                 Ver código
@@ -145,7 +147,7 @@ export default function Home() {
       </section>
 
       {/* Demo Preview */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 bg-muted/10">
         <div className="max-w-5xl mx-auto">
           <div data-animate className="text-center mb-14">
             <p className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
@@ -161,13 +163,13 @@ export default function Home() {
             <div className="mockup-glow" />
 
             {/* Mock window */}
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm overflow-hidden">
+            <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md overflow-hidden shadow-2xl">
               {/* Window bar */}
-              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06] bg-white/[0.02]">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/50 bg-muted/30">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
                 </div>
                 <div className="flex items-center gap-1.5 ml-3">
                   <Sparkles className="h-3 w-3 text-primary" />
@@ -183,9 +185,9 @@ export default function Home() {
                 <div className="p-6 sm:p-8 lg:p-10">
                   <div className="flex items-center gap-2 mb-5">
                     <div className="h-6 w-6 rounded-md bg-red-500/10 flex items-center justify-center">
-                      <Mic className="h-3 w-3 text-red-400" />
+                      <Mic className="h-3 w-3 text-red-500" />
                     </div>
-                    <span className="text-xs font-medium text-red-400 tracking-wide">
+                    <span className="text-xs font-medium text-red-500 tracking-wide">
                       Dictado del médico
                     </span>
                   </div>
@@ -199,18 +201,18 @@ export default function Home() {
                 </div>
 
                 {/* Divider with arrow */}
-                <div className="relative md:border-l border-t md:border-t-0 border-white/[0.06]">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-3.5 hidden md:flex h-7 w-7 rounded-full bg-primary/10 border border-primary/20 items-center justify-center">
+                <div className="relative md:border-l border-t md:border-t-0 border-border/50">
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-3.5 hidden md:flex h-7 w-7 rounded-full bg-primary/10 border border-primary/20 items-center justify-center bg-card">
                     <ArrowRight className="h-3 w-3 text-primary" />
                   </div>
                   <div className="md:hidden flex justify-center -mt-3.5 mb-0 relative z-10">
-                    <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center rotate-90">
+                    <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center rotate-90 bg-card">
                       <ArrowRight className="h-3 w-3 text-primary" />
                     </div>
                   </div>
 
                   {/* Output side */}
-                  <div className="p-6 sm:p-8 lg:p-10">
+                  <div className="p-6 sm:p-8 lg:p-10 bg-muted/10">
                     <div className="flex items-center gap-2 mb-5">
                       <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
                         <Sparkles className="h-3 w-3 text-primary" />
@@ -310,7 +312,7 @@ export default function Home() {
       </section>
 
       {/* How it works - Steps */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 bg-muted/10">
         <div className="max-w-4xl mx-auto">
           <div data-animate className="text-center mb-16">
             <p className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
@@ -374,12 +376,12 @@ export default function Home() {
 
           <div data-animate data-delay="1" className="relative">
             <div className="mockup-glow" />
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm overflow-hidden">
-              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06] bg-white/[0.02]">
+            <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden shadow-xl">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/50 bg-muted/30">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
+                  <div className="w-3 h-3 rounded-full bg-border" />
                 </div>
                 <div className="flex items-center gap-1.5 ml-3">
                   <Monitor className="h-3 w-3 text-muted-foreground" />
@@ -389,7 +391,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="grid md:grid-cols-2">
-                <div className="p-6 sm:p-8 lg:p-10 border-r border-white/[0.06]">
+                <div className="p-6 sm:p-8 lg:p-10 border-r border-border/50">
                   <div className="flex items-center gap-2 mb-5">
                     <Code2 className="h-4 w-4 text-primary" />
                     <span className="text-xs font-medium text-primary tracking-wide">
@@ -421,7 +423,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                <div className="p-6 sm:p-8 lg:p-10 flex items-center justify-center">
+                <div className="p-6 sm:p-8 lg:p-10 flex items-center justify-center bg-muted/10">
                   <div className="text-center space-y-3">
                     <div className="inline-flex h-14 w-14 rounded-xl bg-primary/10 items-center justify-center">
                       <Sparkles className="h-6 w-6 text-primary" />
@@ -468,7 +470,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-10">
+      <footer className="border-t border-border/50 py-10 bg-muted/10">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2.5">
             <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
@@ -534,7 +536,7 @@ function Step({
 }) {
   return (
     <div className="text-center">
-      <div className="step-number inline-flex h-20 w-20 rounded-full bg-white/[0.03] border border-white/[0.08] items-center justify-center mb-5 mx-auto">
+      <div className="step-number inline-flex h-20 w-20 rounded-full bg-muted/20 border border-border/50 items-center justify-center mb-5 mx-auto">
         <div className="flex flex-col items-center gap-0.5">
           {icon}
           <span className="text-[10px] font-bold text-primary tracking-widest">

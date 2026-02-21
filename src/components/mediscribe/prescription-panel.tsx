@@ -15,6 +15,7 @@ import {
   Pill,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import type { PatientRecord } from "@/lib/mock-data";
 
 interface PrescriptionItem {
@@ -254,11 +255,11 @@ ${
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="rounded-lg border p-3 space-y-2"
+                className="rounded-lg border p-3 space-y-2 bg-muted/20"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-[10px] bg-background">
                       <Pill className="h-2.5 w-2.5 mr-0.5" />
                       {index + 1}
                     </Badge>
@@ -274,41 +275,37 @@ ${
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Medicamento"
                     value={item.name}
                     onChange={(e) =>
                       updateItem(item.id, "name", e.target.value)
                     }
-                    className="w-full rounded-md border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="bg-background"
                   />
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Dosis"
                     value={item.dose}
                     onChange={(e) =>
                       updateItem(item.id, "dose", e.target.value)
                     }
-                    className="w-full rounded-md border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="bg-background"
                   />
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Frecuencia"
                     value={item.frequency}
                     onChange={(e) =>
                       updateItem(item.id, "frequency", e.target.value)
                     }
-                    className="w-full rounded-md border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="bg-background"
                   />
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Duración"
                     value={item.duration}
                     onChange={(e) =>
                       updateItem(item.id, "duration", e.target.value)
                     }
-                    className="w-full rounded-md border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="bg-background"
                   />
                 </div>
               </div>
@@ -325,7 +322,7 @@ ${
             </Button>
 
             {/* Special instructions */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 pt-2">
               <label className="text-xs font-medium text-muted-foreground">
                 Indicaciones especiales
               </label>
@@ -333,12 +330,12 @@ ${
                 placeholder="Dieta, cuidados, indicaciones adicionales..."
                 value={specialInstructions}
                 onChange={(e) => setSpecialInstructions(e.target.value)}
-                className="min-h-[60px] max-h-[100px] resize-none"
+                className="min-h-[80px] max-h-[120px] resize-none"
               />
             </div>
 
             {/* Footer note */}
-            <p className="text-[10px] text-muted-foreground text-center border-t pt-2">
+            <p className="text-[10px] text-muted-foreground text-center border-t pt-2 mt-4">
               Válido por 30 días desde la fecha de emisión.
             </p>
           </div>

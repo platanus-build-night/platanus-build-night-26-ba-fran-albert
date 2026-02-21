@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import { 
+  FileText, 
+  Pill, 
+  TestTube, 
+  XCircle, 
+  Clock, 
+  ChevronRight, 
+  CalendarDays,
+  Stethoscope
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Pill, TestTube, XCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 import type { PatientRecord, LabResult } from "@/lib/mock-data";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface TimelineEvent {
   id: string;
@@ -19,68 +32,58 @@ interface TimelineEvent {
 
 const EVENT_CONFIG: Record<
   TimelineEvent["type"],
-  { icon: typeof FileText; color: string; badgeClass: string; label: string }
+  { icon: typeof FileText; color: string; bg: string; label: string }
 > = {
   evolution: {
-    icon: FileText,
-    color: "text-teal-500",
-    badgeClass: "bg-teal-500/10 text-teal-500 border-teal-500/20",
-    label: "Evolución",
+    icon: Stethoscope,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    label: "Consulta",
   },
   med_start: {
     icon: Pill,
     color: "text-blue-500",
-    badgeClass: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    bg: "bg-blue-500/10",
     label: "Medicación",
   },
   lab: {
     icon: TestTube,
     color: "text-violet-500",
-    badgeClass: "bg-violet-500/10 text-violet-500 border-violet-500/20",
+    bg: "bg-violet-500/10",
     label: "Laboratorio",
   },
   med_suspended: {
     icon: XCircle,
     color: "text-red-500",
-    badgeClass: "bg-red-500/10 text-red-500 border-red-500/20",
+    bg: "bg-red-500/10",
     label: "Suspensión",
   },
 };
-
-function alertColor(alert: LabResult["alert"]): string {
-  if (alert === "critical") return "text-red-500 font-semibold";
-  if (alert === "warning") return "text-yellow-500 font-medium";
-  return "text-green-500";
-}
-
-function alertBadgeVariant(alert: LabResult["alert"]): string {
-  if (alert === "critical") return "bg-red-500/10 text-red-500 border-red-500/20";
-  if (alert === "warning") return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
-  return "bg-green-500/10 text-green-500 border-green-500/20";
-}
 
 interface Props {
   record: PatientRecord;
 }
 
 export function TimelinePanel({ record }: Props) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
   const events = useMemo(() => {
     const items: TimelineEvent[] = [];
 
     // Evoluciones
     for (const evo of record.evolutions) {
-      const motivo = evo.fields.find((f) => f.name === "Motivo de consulta")?.value ?? "";
+      // Find diagnosis or main reason
+      const motivo = evo.fields.find((f) => f.name === "Motivo de consulta")?.value;
+      const diag = evo.fields.find((f) => f.name === "Diagnóstico")?.value;
+      
       const allFields = evo.fields
         .map((f) => `**${f.name}:** ${f.value}`)
         .join("\n\n");
+        
       items.push({
         id: `evo-${evo.id}`,
         date: evo.date,
         type: "evolution",
-        title: `${evo.doctorName} - ${evo.specialty}`,
-        description: motivo,
+        title: diag || "Consulta General",
+        description: motivo || "Sin motivo registrado",
         details: allFields,
       });
     }
@@ -93,209 +96,175 @@ export function TimelinePanel({ record }: Props) {
           date: med.startDate,
           type: "med_start",
           title: `Inicio: ${med.name}`,
-          description: `${med.dose}, ${med.frequency}`,
+          description: `${med.dose} · ${med.frequency}`,
         });
       }
-      if (med.status === "SUSPENDED") {
-        items.push({
-          id: `med-sus-${med.name}-${med.startDate}`,
-          date: med.startDate,
-          type: "med_suspended",
-          title: `Suspendido: ${med.name}`,
-          description: `${med.dose}, ${med.frequency}`,
-        });
-      }
+      // Note: Suspended meds logic in mock data might be limited, assuming similar structure
     }
 
-    // Labs agrupados por fecha
+    // Labs
     const labsByDate = new Map<string, LabResult[]>();
     for (const lab of record.labs) {
       const existing = labsByDate.get(lab.date) ?? [];
       existing.push(lab);
       labsByDate.set(lab.date, existing);
     }
+    
     for (const [date, labs] of labsByDate) {
       const alertCount = labs.filter((l) => l.alert !== "normal").length;
       const description =
         alertCount > 0
-          ? `${labs.length} determinaciones, ${alertCount} fuera de rango`
-          : `${labs.length} determinaciones, todos normales`;
+          ? `${alertCount} valores fuera de rango`
+          : `Todos los valores normales`;
+      
       items.push({
         id: `lab-${date}`,
         date,
         type: "lab",
-        title: "Resultados de laboratorio",
+        title: "Análisis de Sangre",
         description,
         labData: labs,
       });
     }
 
-    // Ordenar por fecha descendente
-    items.sort((a, b) => b.date.localeCompare(a.date));
+    items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     return items;
   }, [record]);
 
-  function toggleExpand(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }
-
-  function formatDate(dateStr: string): string {
-    const d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  }
-
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          Timeline del paciente
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {events.length} eventos en orden cronológico
-        </p>
-      </CardHeader>
-      <CardContent className="flex-1 min-h-0">
-        <ScrollArea className="h-full">
-          <div className="relative pl-6 pb-4">
-            {/* Linea vertical del timeline */}
-            <div className="absolute left-[11px] top-0 bottom-0 w-px bg-border" />
+    <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between px-1">
+         <h2 className="text-lg font-semibold flex items-center gap-2">
+           <Clock className="h-5 w-5 text-primary" />
+           Historia Clínica Cronológica
+         </h2>
+         <Badge variant="outline" className="font-normal text-muted-foreground">
+           {events.length} eventos
+         </Badge>
+      </div>
 
-            {events.map((event) => {
-              const config = EVENT_CONFIG[event.type];
-              const Icon = config.icon;
-              const isExpanded = expandedId === event.id;
-              const hasExpandableContent =
-                event.type === "lab" || event.type === "evolution";
+      <ScrollArea className="flex-1 -mx-4 px-4">
+        <div className="relative pl-14 pt-2 pb-10 space-y-8">
+          {/* Vertical Line */}
+          <div className="absolute left-[20px] top-4 bottom-0 w-px bg-gradient-to-b from-border via-border to-transparent" />
 
-              return (
-                <div key={event.id} className="relative mb-4 last:mb-0">
-                  {/* Dot en el timeline */}
-                  <div
-                    className={`absolute -left-6 top-1 flex items-center justify-center h-5 w-5 rounded-full border-2 border-background bg-background`}
+          {events.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <CalendarDays className="h-10 w-10 mx-auto opacity-20 mb-3" />
+              <p>No hay eventos registrados</p>
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-6">
+              {events.map((event) => {
+                const config = EVENT_CONFIG[event.type];
+                const Icon = config.icon;
+                const dateObj = new Date(event.date); // Assuming ISO or YYYY-MM-DD
+                // Fallback if date is invalid
+                const isValidDate = !isNaN(dateObj.getTime());
+                const day = isValidDate ? format(dateObj, "dd", { locale: es }) : "?";
+                const month = isValidDate ? format(dateObj, "MMM", { locale: es }) : "?";
+                const year = isValidDate ? format(dateObj, "yyyy", { locale: es }) : "?";
+
+                return (
+                  <AccordionItem 
+                    key={event.id} 
+                    value={event.id} 
+                    className="relative border-none"
                   >
-                    <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                  </div>
-
-                  {/* Contenido */}
-                  <div
-                    className={`rounded-lg border p-3 transition-colors ${
-                      hasExpandableContent
-                        ? "cursor-pointer hover:bg-muted/50"
-                        : ""
-                    }`}
-                    onClick={
-                      hasExpandableContent
-                        ? () => toggleExpand(event.id)
-                        : undefined
-                    }
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] ${config.badgeClass}`}
-                        >
-                          {config.label}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(event.date)}
-                        </span>
-                      </div>
-                      {hasExpandableContent && (
-                        <span className="text-muted-foreground shrink-0">
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </span>
-                      )}
+                    {/* Timeline Dot */}
+                    <div className={cn(
+                      "absolute -left-14 top-0 h-10 w-10 rounded-full border-4 border-background flex items-center justify-center z-10 shadow-sm transition-transform hover:scale-110",
+                      config.bg,
+                      config.color
+                    )}>
+                      <Icon className="h-5 w-5" />
                     </div>
 
-                    <p className="text-sm font-medium">{event.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {event.description}
-                    </p>
-
-                    {/* Expanded content */}
-                    {isExpanded && event.type === "lab" && event.labData && (
-                      <div className="mt-3 space-y-1.5 border-t pt-2">
-                        {event.labData.map((lab) => (
-                          <div
-                            key={`${lab.testName}-${lab.date}`}
-                            className="flex items-center justify-between text-xs"
-                          >
-                            <span>{lab.testName}</span>
-                            <div className="flex items-center gap-2">
-                              <span className={alertColor(lab.alert)}>
-                                {lab.value} {lab.unit}
-                              </span>
-                              <Badge
-                                variant="outline"
-                                className={`text-[9px] ${alertBadgeVariant(lab.alert)}`}
-                              >
-                                {lab.alert === "normal"
-                                  ? "Normal"
-                                  : lab.alert === "warning"
-                                    ? "Alerta"
-                                    : "Crítico"}
-                              </Badge>
-                            </div>
+                    <div className="flex flex-col gap-1 mb-2">
+                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                         {day} {month} {year}
+                         <span className="w-1 h-1 rounded-full bg-border" />
+                         <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full bg-muted/50 text-foreground", config.color)}>
+                            {config.label}
+                         </span>
+                       </span>
+                       <AccordionTrigger className="hover:no-underline py-0 text-left">
+                          <div className="flex-1">
+                             <h3 className="text-base font-semibold text-foreground leading-tight">
+                               {event.title}
+                             </h3>
+                             <p className="text-sm text-muted-foreground mt-0.5 font-normal">
+                               {event.description}
+                             </p>
                           </div>
-                        ))}
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          Ref: valores entre referenceMin y referenceMax
-                        </p>
-                      </div>
-                    )}
+                       </AccordionTrigger>
+                    </div>
 
-                    {isExpanded && event.type === "evolution" && event.details && (
-                      <div className="mt-3 border-t pt-2 text-xs space-y-2 leading-relaxed">
-                        {event.details.split("\n\n").map((block, i) => {
-                          const boldMatch = block.match(
-                            /^\*\*(.+?):\*\*\s*([\s\S]*)$/
-                          );
-                          if (boldMatch) {
-                            return (
-                              <div key={i}>
-                                <span className="font-semibold text-foreground">
-                                  {boldMatch[1]}:
-                                </span>{" "}
-                                <span className="text-muted-foreground">
-                                  {boldMatch[2]}
-                                </span>
-                              </div>
-                            );
-                          }
-                          return (
-                            <p key={i} className="text-muted-foreground">
-                              {block}
-                            </p>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                    <AccordionContent className="pt-2 pl-1">
+                       <Card className="border-l-4 border-l-primary/20 bg-muted/30 shadow-none">
+                         <CardContent className="p-4">
+                           {event.type === "lab" && event.labData && (
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                               {event.labData.map((lab, i) => (
+                                 <div key={i} className="flex justify-between items-center p-2 rounded bg-background border border-border/50">
+                                    <span className="text-xs font-medium">{lab.testName}</span>
+                                    <div className="text-right">
+                                       <span className={cn(
+                                         "text-xs font-bold block",
+                                         lab.alert === "critical" ? "text-destructive" :
+                                         lab.alert === "warning" ? "text-amber-500" : "text-emerald-500"
+                                       )}>
+                                         {lab.value} {lab.unit}
+                                       </span>
+                                       {lab.alert !== "normal" && (
+                                         <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
+                                           {lab.alert === "critical" ? "Crítico" : "Alerta"}
+                                         </span>
+                                       )}
+                                    </div>
+                                 </div>
+                               ))}
+                             </div>
+                           )}
 
-            {events.length === 0 && (
-              <div className="text-center py-8">
-                <Clock className="h-8 w-8 mx-auto text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground mt-2">
-                  No hay eventos registrados para este paciente.
-                </p>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+                           {event.type === "evolution" && event.details && (
+                             <div className="space-y-3 text-sm">
+                               {event.details.split("\n\n").map((block, i) => {
+                                 const parts = block.split("**");
+                                 if (parts.length >= 3) {
+                                   const label = parts[1].replace(":", "");
+                                   const content = parts[2];
+                                   return (
+                                     <div key={i}> 
+                                       <span className="text-xs font-bold text-primary uppercase tracking-wide block mb-0.5">
+                                         {label}
+                                       </span>
+                                       <p className="text-muted-foreground leading-relaxed">
+                                         {content}
+                                       </p>
+                                     </div>
+                                   )
+                                 }
+                                 return <p key={i}>{block}</p>
+                               })}
+                             </div>
+                           )}
+                           
+                           {(event.type === "med_start" || event.type === "med_suspended") && (
+                             <p className="text-sm text-muted-foreground italic">
+                               Detalles del medicamento no disponibles en esta vista rápida.
+                             </p>
+                           )}
+                         </CardContent>
+                       </Card>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
