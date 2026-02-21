@@ -32,17 +32,16 @@ export function ChatPanel({ patientId, patientName }: Props) {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight;
-      }
-    }
+    scrollToBottom();
   }, [messages, streamingText, isStreaming]);
 
   // Auto-resize textarea
@@ -150,10 +149,9 @@ export function ChatPanel({ patientId, patientName }: Props) {
       </CardHeader>
 
       {/* Messages Area */}
-      <CardContent className="flex-1 flex flex-col min-h-0 p-0">
-        <div className="flex-1 min-h-0 relative" ref={scrollRef}>
-        <ScrollArea className="absolute inset-0 px-4 py-4">
-          <div className="space-y-6 pb-4">
+      <CardContent className="flex-1 flex flex-col min-h-0 p-0 overflow-hidden">
+        <ScrollArea className="flex-1 w-full">
+          <div className="px-4 py-6 space-y-6 pb-12">
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center py-12 px-4 text-center space-y-4 animate-in fade-in zoom-in duration-500">
                 <div className="h-16 w-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-2 ring-1 ring-primary/10">
@@ -188,31 +186,31 @@ export function ChatPanel({ patientId, patientName }: Props) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={i}
-                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex gap-3 min-w-0 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.role === "assistant" && (
-                  <Avatar className="h-8 w-8 mt-1 border border-primary/10 bg-primary/5">
+                  <Avatar className="h-8 w-8 mt-1 border border-primary/10 bg-primary/5 shrink-0">
                     <AvatarFallback className="bg-transparent"><Bot className="h-4 w-4 text-primary" /></AvatarFallback>
                   </Avatar>
                 )}
                 
                 <div className={`
-                  max-w-[85%] px-4 py-3 text-sm shadow-sm
+                  max-w-[85%] px-4 py-3 text-sm shadow-sm break-words overflow-hidden
                   ${msg.role === "user" 
                     ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm" 
                     : "bg-muted/50 border border-border/50 text-foreground rounded-2xl rounded-tl-sm"}
                 `}>
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-background/50 overflow-hidden break-words">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-background/50 prose-pre:overflow-x-auto break-words">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    <p className="whitespace-pre-wrap leading-relaxed break-words">{msg.content}</p>
                   )}
                 </div>
 
                 {msg.role === "user" && (
-                  <Avatar className="h-8 w-8 mt-1 border border-border bg-muted">
+                  <Avatar className="h-8 w-8 mt-1 border border-border bg-muted shrink-0">
                     <AvatarFallback><User className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
                   </Avatar>
                 )}
@@ -224,14 +222,14 @@ export function ChatPanel({ patientId, patientName }: Props) {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex gap-3 justify-start"
+                className="flex gap-3 justify-start min-w-0"
               >
-                <Avatar className="h-8 w-8 mt-1 border border-primary/10 bg-primary/5">
+                <Avatar className="h-8 w-8 mt-1 border border-primary/10 bg-primary/5 shrink-0">
                    <AvatarFallback className="bg-transparent"><Bot className="h-4 w-4 text-primary" /></AvatarFallback>
                 </Avatar>
-                <div className="max-w-[85%] bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
+                <div className="max-w-[85%] bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm break-words overflow-hidden">
                   {streamingText ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none overflow-hidden break-words">
+                    <div className="prose prose-sm dark:prose-invert max-w-none break-words prose-pre:overflow-x-auto">
                       <ReactMarkdown>{streamingText}</ReactMarkdown>
                     </div>
                   ) : (
@@ -244,37 +242,39 @@ export function ChatPanel({ patientId, patientName }: Props) {
                 </div>
               </motion.div>
             )}
+            
+            {/* Scroll Anchor */}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
-        </div>
-
-        {/* Input Area */}
-        <div className="p-4 bg-background border-t shrink-0">
-          <div className="relative flex items-end gap-2 bg-muted/30 p-2 rounded-2xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
-            <Textarea
-              ref={textareaRef}
-              placeholder="Escribí un mensaje..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isStreaming}
-              rows={1}
-              className="min-h-[24px] max-h-[120px] w-full resize-none bg-transparent border-0 focus-visible:ring-0 px-3 py-2 text-sm placeholder:text-muted-foreground/50 shadow-none"
-            />
-            <Button
-              size="icon"
-              onClick={handleSend}
-              disabled={!input.trim() || isStreaming}
-              className={`h-9 w-9 mb-0.5 rounded-xl transition-all duration-300 ${input.trim() ? "bg-primary text-primary-foreground shadow-md hover:scale-105" : "bg-transparent text-muted-foreground hover:bg-muted"}`}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-[10px] text-center text-muted-foreground/40 mt-2">
-            La IA puede cometer errores. Verificá la información clínica importante.
-          </p>
-        </div>
       </CardContent>
+
+      {/* Input Area (Outside CardContent, as Fixed Footer) */}
+      <div className="p-4 bg-background border-t shrink-0 z-20">
+        <div className="relative flex items-end gap-2 bg-muted/30 p-2 rounded-2xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
+          <Textarea
+            ref={textareaRef}
+            placeholder="Escribí un mensaje..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isStreaming}
+            rows={1}
+            className="min-h-[24px] max-h-[120px] w-full resize-none bg-transparent border-0 focus-visible:ring-0 px-3 py-2 text-sm placeholder:text-muted-foreground/50 shadow-none"
+          />
+          <Button
+            size="icon"
+            onClick={handleSend}
+            disabled={!input.trim() || isStreaming}
+            className={`h-9 w-9 mb-0.5 rounded-xl transition-all duration-300 ${input.trim() ? "bg-primary text-primary-foreground shadow-md hover:scale-105" : "bg-transparent text-muted-foreground hover:bg-muted"}`}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-[10px] text-center text-muted-foreground/40 mt-2">
+          La IA puede cometer errores. Verificá la información clínica importante.
+        </p>
+      </div>
     </Card>
   );
 }

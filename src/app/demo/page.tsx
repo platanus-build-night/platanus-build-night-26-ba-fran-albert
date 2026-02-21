@@ -202,7 +202,7 @@ export default function DemoPage() {
               </div>
 
               <div className={`flex-1 min-h-0 bg-muted/10 p-4 md:p-6 ${isFixedLayout ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
-                <div className={`max-w-6xl mx-auto ${isFixedLayout ? "flex-1 min-h-0 flex flex-col" : ""}`}>
+                <div className={`max-w-6xl mx-auto w-full ${isFixedLayout ? "flex-1 min-h-0 flex flex-col" : ""}`}>
                   {/* We use key to force re-mount when patient changes for clean state */}
                   <TabsContent value="dashboard" className="mt-0 focus-visible:ring-0">
                     <DashboardPanel key={`dash-${selectedPatient.patient.id}`} record={selectedPatient} />
