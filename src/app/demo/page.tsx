@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,10 +12,42 @@ import { EvolutionPanel } from "@/components/mediscribe/evolution-panel";
 import { ChatPanel } from "@/components/mediscribe/chat-panel";
 import type { PatientRecord } from "@/lib/mock-data";
 
-export default function DemoPage() {
+function DemoContent() {
+  const searchParams = useSearchParams();
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(
     null,
   );
+  const [dataMode, setDataMode] = useState<"mock" | "ehr">("mock");
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const patientId = searchParams.get("patientId");
+
+    if (!token) return;
+
+    fetch("/api/auth/init", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data: { mode: "mock" | "ehr" }) => {
+        setDataMode(data.mode);
+        window.history.replaceState({}, "", "/demo");
+
+        if (patientId) {
+          fetch(`/api/patients/${patientId}`)
+            .then((res) => {
+              if (res.ok) return res.json();
+              return null;
+            })
+            .then((record: PatientRecord | null) => {
+              if (record) setSelectedPatient(record);
+            });
+        }
+      })
+      .catch((err) => console.error("EHR init failed:", err));
+  }, [searchParams]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -33,7 +66,7 @@ export default function DemoPage() {
               <span className="font-semibold text-sm">MediScribe</span>
             </div>
             <span className="text-xs text-muted-foreground border rounded px-1.5 py-0.5">
-              Demo
+              {dataMode === "ehr" ? "EHR" : "Demo"}
             </span>
           </div>
           {selectedPatient && (
@@ -52,6 +85,7 @@ export default function DemoPage() {
           <PatientSelector
             selectedId={selectedPatient?.patient.id ?? null}
             onSelect={setSelectedPatient}
+            mode={dataMode}
           />
         </aside>
 
@@ -105,5 +139,13 @@ export default function DemoPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function DemoPage() {
+  return (
+    <Suspense>
+      <DemoContent />
+    </Suspense>
   );
 }

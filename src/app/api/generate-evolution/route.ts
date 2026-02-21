@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateCompletion } from "@/lib/ai";
 import { EVOLUTION_PROMPT } from "@/lib/prompts";
-import { getPatientById, buildPatientContext } from "@/lib/mock-data";
+import { getPatientById, buildPatientContext } from "@/lib/patient-service";
 
 export async function POST(req: NextRequest) {
   const { patientId, freeText } = await req.json();
@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Texto requerido" }, { status: 400 });
   }
 
-  const record = getPatientById(patientId);
+  const token = req.cookies.get("ehr-token")?.value;
+  const record = await getPatientById(patientId, token);
   if (!record) {
     return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });
   }
