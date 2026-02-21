@@ -154,7 +154,7 @@ function fetchEvoluciones(patientId: string, token: string) {
 function fetchMedicacion(patientId: string, token: string) {
   const endpoint = getEndpoint(
     "EHR_ENDPOINT_MEDICATION",
-    "/medicacion-actual/usuario/{id}",
+    "/historia-clinica/{id}/medicacion-actual",
   );
   return ehrFetch<EHRMedicationDTO[]>(buildUrl(endpoint, { id: patientId }), token);
 }
@@ -163,7 +163,7 @@ async function fetchLabResults(
   patientId: string,
   token: string,
 ): Promise<{ studies: EHRStudyDTO[]; labData: EHRLabDataDTO[] }> {
-  const studiesEndpoint = getEndpoint("EHR_ENDPOINT_STUDIES", "/study?userId={id}");
+  const studiesEndpoint = getEndpoint("EHR_ENDPOINT_STUDIES", "/study/byUser/{id}");
   const studies = await ehrFetch<EHRStudyDTO[]>(
     buildUrl(studiesEndpoint, { id: patientId }),
     token,
@@ -176,22 +176,10 @@ async function fetchLabResults(
     "/blood-test-data/byStudies",
   );
   const studyIds = studies.map((s) => s.id);
-  const labDataUrl = `${getBaseUrl()}${labDataEndpoint}`;
+  const queryString = studyIds.map((id) => `studiesIds=${id}`).join("&");
+  const labDataUrl = `${getBaseUrl()}${labDataEndpoint}?${queryString}`;
 
-  const res = await fetch(labDataUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ studyIds }),
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!res.ok) {
-    console.error(`[ehr-adapter] Lab data API error: ${res.status} — ${labDataUrl}`);
-    throw new Error(`EHR API error: ${res.status}`);
-  }
-  const labData = (await res.json()) as EHRLabDataDTO[];
+  const labData = await ehrFetch<EHRLabDataDTO[]>(labDataUrl, token);
   return { studies, labData };
 }
 
