@@ -182,8 +182,8 @@ export function Sidebar({ selectedId, onSelect, mode = "mock", className }: Side
             <AvatarFallback>DR</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Dr. Francisco</p>
-            <p className="text-xs text-muted-foreground truncate">Cardiología</p>
+            <p className="text-sm font-medium truncate">Dr. Demo</p>
+            <p className="text-xs text-muted-foreground truncate">Medicina General</p>
           </div>
           <Settings className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </div>

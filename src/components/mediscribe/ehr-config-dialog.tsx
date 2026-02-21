@@ -31,7 +31,7 @@ export function EhrConfigDialog({ dataMode, onConnect, onDisconnect }: EhrConfig
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<ConnectionMode>(dataMode === "ehr" ? "server" : "mock");
   const [url, setUrl] = useState("http://localhost:3001");
-  const [userName, setUserName] = useState("26121361");
+  const [userName, setUserName] = useState("66778899");
   const [password, setPassword] = useState("");
   const [directToken, setDirectToken] = useState("");
   const [loading, setLoading] = useState(false);
